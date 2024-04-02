@@ -17,7 +17,7 @@
         <powerjob.worker.starter.version>5.0.1-beta</powerjob.worker.starter.version>
         <fastjson.version>1.2.83</fastjson.version>
         <powerjob.official.processors.version>5.0.1-beta</powerjob.official.processors.version>
-
+        <ojdbc.version>19.7.0.0</ojdbc.version>
         <!-- 部署时跳过该module -->
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
@@ -64,6 +64,18 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
+        </dependency>
+
+        <!-- oracle -->
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>${ojdbc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.database.nls</groupId>
+            <artifactId>orai18n</artifactId>
+            <version>${ojdbc.version}</version>
         </dependency>
 
 
