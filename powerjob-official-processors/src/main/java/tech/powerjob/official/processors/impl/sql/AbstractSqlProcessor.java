@@ -29,7 +29,7 @@ import java.util.function.Predicate;
  * * * 解析参数 => 校验参数 => 解析 SQL => 校验 SQL => 执行 SQL
  *
  * 可以通过 {@link AbstractSqlProcessor#registerSqlValidator} 方法注册 SQL 校验器拦截非法 SQL
- * 可以通过指定 {@link AbstractSqlProcessor.SqlParser} 来实现定制 SQL 解析逻辑的需求（比如 宏变量替换，参数替换等）
+ * 可以通过指定 {@link SqlParser} 来实现定制 SQL 解析逻辑的需求（比如 宏变量替换，参数替换等）
  *
  * @author Echo009
  * @since 2021/3/12
@@ -58,6 +58,11 @@ public abstract class AbstractSqlProcessor extends CommonBasicProcessor {
 
     @Override
     public ProcessResult process0(TaskContext taskContext) {
+
+        Map<String, String> workflowContext = taskContext.getWorkflowContext().fetchWorkflowContext();
+        log.info("工作流上下文数据:{}", workflowContext);
+
+        taskContext.getWorkflowContext().appendData2WfContext("lastsqlok", 0);
 
         OmsLogger omsLogger = taskContext.getOmsLogger();
         // 解析参数
@@ -90,6 +95,7 @@ public abstract class AbstractSqlProcessor extends CommonBasicProcessor {
 
         omsLogger.info(stopWatch.prettyPrint());
         String message = String.format("execute successfully, used time: %s millisecond", stopWatch.getTotalTimeMillis());
+        taskContext.getWorkflowContext().appendData2WfContext("lastsqlok", 200);
         return new ProcessResult(true, message);
     }
 
