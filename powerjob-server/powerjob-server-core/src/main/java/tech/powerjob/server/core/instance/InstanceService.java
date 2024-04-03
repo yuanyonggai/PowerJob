@@ -164,6 +164,10 @@ public class InstanceService {
         log.info("[Instance-{}] retry instance in appId: {}", instanceId, appId);
 
         InstanceInfoDO instanceInfo = fetchInstanceInfo(instanceId);
+        //修改：当任务成功时，不能重试
+        if (InstanceStatus.SUCCEED.getV() == instanceInfo.getStatus()) {
+            throw new PowerJobException("succeed instance can not be retry!");
+        }
         if (!InstanceStatus.FINISHED_STATUS.contains(instanceInfo.getStatus())) {
             throw new PowerJobException("Only stopped instance can be retry!");
         }

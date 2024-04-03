@@ -85,9 +85,40 @@ class TestWorkflow extends ClientInitializer {
         saveWorkflowNodeRequest3.setType(WorkflowNodeType.JOB.getCode());
 
 
-        List<WorkflowNodeInfoDTO> nodeList = powerJobClient.saveWorkflowNode(Lists.newArrayList(saveWorkflowNodeRequest1,saveWorkflowNodeRequest2,saveWorkflowNodeRequest3)).getData();
+        List<WorkflowNodeInfoDTO> nodeList = powerJobClient.saveWorkflowNode(Lists.newArrayList(saveWorkflowNodeRequest1,saveWorkflowNodeRequest3,saveWorkflowNodeRequest2)).getData();
         System.out.println(nodeList);
         Assertions.assertNotNull(nodeList);
+
+        // 创建节点
+        SaveWorkflowNodeRequest saveWorkflowNodeRequest4 = new SaveWorkflowNodeRequest();
+        saveWorkflowNodeRequest4.setJobId(1L);
+        saveWorkflowNodeRequest4.setNodeName("DAG-Node-4");
+        saveWorkflowNodeRequest4.setType(WorkflowNodeType.JOB.getCode());
+
+        SaveWorkflowNodeRequest saveWorkflowNodeRequest5 = new SaveWorkflowNodeRequest();
+        saveWorkflowNodeRequest5.setJobId(1L);
+        saveWorkflowNodeRequest5.setNodeName("DAG-Node-5");
+        saveWorkflowNodeRequest5.setType(WorkflowNodeType.JOB.getCode());
+
+
+        SaveWorkflowNodeRequest saveWorkflowNodeRequest6 = new SaveWorkflowNodeRequest();
+        saveWorkflowNodeRequest6.setJobId(1L);
+        saveWorkflowNodeRequest6.setNodeName("DAG-Node-6");
+        saveWorkflowNodeRequest6.setType(WorkflowNodeType.JOB.getCode());
+
+
+        List<WorkflowNodeInfoDTO> nodeList2 = powerJobClient.saveWorkflowNode(Lists.newArrayList(saveWorkflowNodeRequest4,saveWorkflowNodeRequest5,saveWorkflowNodeRequest6)).getData();
+        System.out.println(nodeList2);
+        Assertions.assertNotNull(nodeList2);
+
+        SaveWorkflowNodeRequest saveWorkflowNodeRequest7 = new SaveWorkflowNodeRequest();
+        saveWorkflowNodeRequest7.setJobId(1L);
+        saveWorkflowNodeRequest7.setNodeName("DAG-Node-7");
+        saveWorkflowNodeRequest7.setType(WorkflowNodeType.JOB.getCode());
+
+        List<WorkflowNodeInfoDTO> nodeList3 = powerJobClient.saveWorkflowNode(Lists.newArrayList(saveWorkflowNodeRequest7)).getData();
+        System.out.println(nodeList3);
+        Assertions.assertNotNull(nodeList3);
 
 
         // DAG 图
@@ -100,6 +131,21 @@ class TestWorkflow extends ClientInitializer {
 
         edges.add(new PEWorkflowDAG.Edge(nodeList.get(0).getId(), nodeList.get(1).getId()));
         edges.add(new PEWorkflowDAG.Edge(nodeList.get(1).getId(), nodeList.get(2).getId()));
+
+        nodes.add(new PEWorkflowDAG.Node(nodeList2.get(0).getId()));
+        nodes.add(new PEWorkflowDAG.Node(nodeList2.get(1).getId()));
+        nodes.add(new PEWorkflowDAG.Node(nodeList2.get(2).getId()));
+
+        nodes.add(new PEWorkflowDAG.Node(nodeList3.get(0).getId()));
+
+        edges.add(new PEWorkflowDAG.Edge(nodeList2.get(0).getId(), nodeList2.get(1).getId()));
+        edges.add(new PEWorkflowDAG.Edge(nodeList2.get(1).getId(), nodeList2.get(2).getId()));
+
+        edges.add(new PEWorkflowDAG.Edge(nodeList.get(2).getId(), nodeList3.get(0).getId()));
+        edges.add(new PEWorkflowDAG.Edge(nodeList2.get(2).getId(), nodeList3.get(0).getId()));
+
+
+
         PEWorkflowDAG peWorkflowDAG = new PEWorkflowDAG(nodes, edges);
 
         // 保存完整信息
