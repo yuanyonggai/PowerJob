@@ -3,6 +3,7 @@ package tech.powerjob.server.web.controller;
 import tech.powerjob.common.request.http.SaveWorkflowNodeRequest;
 import tech.powerjob.common.request.http.SaveWorkflowRequest;
 import tech.powerjob.common.response.ResultDTO;
+import tech.powerjob.common.utils.CommonUtils;
 import tech.powerjob.server.common.constants.SwitchableStatus;
 import tech.powerjob.server.persistence.PageResult;
 import tech.powerjob.server.persistence.remote.model.WorkflowInfoDO;
@@ -16,6 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import com.alibaba.fastjson.JSON;
+
+import lombok.Data;
 
 import javax.annotation.Resource;
 import java.text.ParseException;
@@ -93,7 +98,38 @@ public class WorkflowController {
                                        @RequestParam(required = false,defaultValue = "0") Long delay,
                                        @RequestParam(required = false) String initParams
                                        ) {
+        //修改：支持补数，传递时间段
+
+        WorkflowContinuousBatchParams workflowContinuousBatchParams = JSON.parseObject(initParams, WorkflowContinuousBatchParams.class);
+
         return ResultDTO.success(workflowService.runWorkflow(workflowId, appId, initParams, delay));
+    }
+
+
+    //修改：工作流支持连续调度执行，参数定义
+    @Data
+    public static class WorkflowContinuousBatchParams {
+        /**
+         * 数据源名称
+         */
+        private String dataSourceName;
+        /**
+         * 需要执行的 SQL
+         */
+        private String sql;
+        /**
+         * 超时时间
+         */
+        private Integer timeout;
+        /**
+         * jdbc url
+         * 具体格式可参考 https://www.baeldung.com/java-jdbc-url-format
+         */
+        private String jdbcUrl;
+        /**
+         * 是否展示 SQL 执行结果
+         */
+        private boolean showResult;
     }
 
     @GetMapping("/fetch")
