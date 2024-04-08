@@ -17,6 +17,7 @@ public class OmsConstant {
     public static final int SERVER_DEFAULT_HTTP_PORT = 10010;
 
     public static final String TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE_PATTERN = "yyyy-MM-dd";
     public static final String TIME_PATTERN_PLUS = "yyyy-MM-dd HH:mm:ss.SSS";
 
     public static final String NONE = "N/A";

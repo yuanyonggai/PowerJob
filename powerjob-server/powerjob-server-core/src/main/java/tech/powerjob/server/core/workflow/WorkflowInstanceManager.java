@@ -16,6 +16,7 @@ import tech.powerjob.common.enums.WorkflowInstanceStatus;
 import tech.powerjob.common.enums.WorkflowNodeType;
 import tech.powerjob.common.exception.PowerJobException;
 import tech.powerjob.common.model.PEWorkflowDAG;
+import tech.powerjob.common.model.WorkflowParams;
 import tech.powerjob.common.serialize.JsonUtils;
 import tech.powerjob.common.utils.CommonUtils;
 import tech.powerjob.server.common.constants.SwitchableStatus;
@@ -179,6 +180,13 @@ public class WorkflowInstanceManager {
         newWfInstance.setExpectedTriggerTime(expectTriggerTime);
         newWfInstance.setActualTriggerTime(System.currentTimeMillis());
         newWfInstance.setWfInitParams(initParams);
+        //修改: 添加数据日期
+        if (StringUtils.isNoneBlank(initParams)) {
+            WorkflowParams workflowParams = JSON.parseObject(initParams, WorkflowParams.class);
+            newWfInstance.setDataDate(workflowParams.getDataDate());
+        } else {
+            newWfInstance.setDataDate(CommonUtils.formatDate(now));
+        }
 
         // 如果 initParams 是个合法的 Map<String,String> JSON 串则直接将其注入 wfContext
         boolean injectDirect = false;

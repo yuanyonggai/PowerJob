@@ -167,9 +167,9 @@ public class ComplementRunner extends EventHandler implements Runnable {
 //                }         
 
                 WorkflowParams workflowParams = new WorkflowParams();
-                String dataDate = this.flowComplementVO.getCurrentDataDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));                
-                workflowParams.setDataDateStart(dataDate);
-                workflowParams.setDataDateEnd(dataDate);
+                workflowParams.setDataDate(this.flowComplementVO.getCurrentDataDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                workflowParams.setDataDateStart(this.flowComplementVO.getStartDataDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                workflowParams.setDataDateEnd(this.flowComplementVO.getEndDataDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
                 String initParams = JSON.toJSONString(workflowParams);
                 Long wfInstanceId = workflowService.runWorkflow(flowComplementVO.getWorkflowId(), flowComplementVO.getAppId(), initParams, 0L);
 

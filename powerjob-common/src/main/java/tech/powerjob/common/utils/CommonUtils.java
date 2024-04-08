@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -142,6 +143,22 @@ public class CommonUtils {
         }
         try {
             return DateFormatUtils.format(ts, OmsConstant.TIME_PATTERN);
+        }catch (Exception ignore) {
+        }
+        return OmsConstant.NONE;
+    }
+
+    /**
+     * 格式化时间，将时间戳转化为可阅读时间
+     * @param date 日期
+     * @return 可阅读时间
+     */
+    public static String formatDate(Date date) {
+        if (date == null) {
+            return OmsConstant.NONE;
+        }
+        try {
+            return DateFormatUtils.format(date, OmsConstant.DATE_PATTERN);
         }catch (Exception ignore) {
         }
         return OmsConstant.NONE;

@@ -46,6 +46,11 @@ public class WorkflowInstanceInfoVO {
     private String result;
 
     /**
+     * 数据日期
+     */
+    private String dataDate;
+
+    /**
      * 预计触发时间
      */
     private String expectedTriggerTime;

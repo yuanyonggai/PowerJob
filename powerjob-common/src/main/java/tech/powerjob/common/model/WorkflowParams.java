@@ -10,6 +10,10 @@ import tech.powerjob.common.utils.CommonUtils;
 @Accessors(chain = true)
 public class WorkflowParams {
     /**
+     * 数据日期
+     */
+    private String dataDate;
+    /**
      * 开始日期
      */
     private String dataDateStart;
