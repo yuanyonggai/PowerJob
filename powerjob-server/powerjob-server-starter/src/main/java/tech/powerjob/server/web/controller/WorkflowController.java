@@ -1,14 +1,15 @@
 package tech.powerjob.server.web.controller;
 
+import tech.powerjob.common.model.WorkflowParams;
 import tech.powerjob.common.request.http.SaveWorkflowNodeRequest;
 import tech.powerjob.common.request.http.SaveWorkflowRequest;
 import tech.powerjob.common.response.ResultDTO;
-import tech.powerjob.common.utils.CommonUtils;
 import tech.powerjob.server.common.constants.SwitchableStatus;
 import tech.powerjob.server.persistence.PageResult;
 import tech.powerjob.server.persistence.remote.model.WorkflowInfoDO;
 import tech.powerjob.server.persistence.remote.model.WorkflowNodeInfoDO;
 import tech.powerjob.server.persistence.remote.repository.WorkflowInfoRepository;
+import tech.powerjob.server.core.workflow.WorkflowComplementService;
 import tech.powerjob.server.core.workflow.WorkflowService;
 import tech.powerjob.server.web.request.QueryWorkflowInfoRequest;
 import tech.powerjob.server.web.response.WorkflowInfoVO;
@@ -17,15 +18,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
 import com.alibaba.fastjson.JSON;
-
-import lombok.Data;
-
 import javax.annotation.Resource;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.function.LongToDoubleFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -38,9 +35,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/workflow")
 public class WorkflowController {
-
     @Resource
     private WorkflowService workflowService;
+    @Resource
+    private WorkflowComplementService workflowComplementService;
     @Resource
     private WorkflowInfoRepository workflowInfoRepository;
 
@@ -93,44 +91,20 @@ public class WorkflowController {
         return ResultDTO.success(convertPage(wfPage));
     }
 
-    @GetMapping("/run")
+    @GetMapping("/run")    
     public ResultDTO<Long> runWorkflow(Long workflowId, Long appId,
-                                       @RequestParam(required = false,defaultValue = "0") Long delay,
-                                       @RequestParam(required = false) String initParams
-                                       ) {
-        //修改：支持补数，传递时间段
-
-        WorkflowContinuousBatchParams workflowContinuousBatchParams = JSON.parseObject(initParams, WorkflowContinuousBatchParams.class);
-
-        return ResultDTO.success(workflowService.runWorkflow(workflowId, appId, initParams, delay));
-    }
-
-
-    //修改：工作流支持连续调度执行，参数定义
-    @Data
-    public static class WorkflowContinuousBatchParams {
-        /**
-         * 数据源名称
-         */
-        private String dataSourceName;
-        /**
-         * 需要执行的 SQL
-         */
-        private String sql;
-        /**
-         * 超时时间
-         */
-        private Integer timeout;
-        /**
-         * jdbc url
-         * 具体格式可参考 https://www.baeldung.com/java-jdbc-url-format
-         */
-        private String jdbcUrl;
-        /**
-         * 是否展示 SQL 执行结果
-         */
-        private boolean showResult;
-    }
+            @RequestParam(required = false, defaultValue = "0") Long delay,
+            @RequestParam(required = false) String initParams) {
+        // 修改：支持补数，传递时间段
+        if (StringUtils.isNoneBlank(initParams)) {
+            WorkflowParams workflowParams = JSON.parseObject(initParams, WorkflowParams.class);
+            // 对参数进行校验
+            workflowParams.valid();
+            return ResultDTO.success(workflowComplementService.runComplement(appId, workflowId, LocalDate.parse(workflowParams.getDataDateStart()), LocalDate.parse(workflowParams.getDataDateEnd())));
+        } else {
+            return ResultDTO.success(workflowService.runWorkflow(workflowId, appId, initParams, delay));
+        }        
+    }    
 
     @GetMapping("/fetch")
     public ResultDTO<WorkflowInfoVO> fetchWorkflow(Long workflowId, Long appId) {

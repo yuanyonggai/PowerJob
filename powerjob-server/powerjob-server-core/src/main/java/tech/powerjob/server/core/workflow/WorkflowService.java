@@ -269,6 +269,8 @@ public class WorkflowService {
     @DesignateServer
     public Long runWorkflow(Long wfId, Long appId, String initParams, Long delay) {
 
+        //TO_DO修改：启动参数加入数据日期参数，根据配置文件动态设置
+
         delay = delay == null ? 0 : delay;
         WorkflowInfoDO wfInfo = permissionCheck(wfId, appId);
 
