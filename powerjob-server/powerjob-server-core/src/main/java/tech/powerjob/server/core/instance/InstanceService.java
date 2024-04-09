@@ -2,18 +2,25 @@ package tech.powerjob.server.core.instance;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
+
 import tech.powerjob.common.PowerQuery;
 import tech.powerjob.common.RemoteConstant;
 import tech.powerjob.common.SystemInstanceResult;
 import tech.powerjob.common.enums.InstanceStatus;
 import tech.powerjob.common.exception.PowerJobException;
 import tech.powerjob.common.model.InstanceDetail;
+import tech.powerjob.common.model.RunParams;
 import tech.powerjob.common.request.ServerQueryInstanceStatusReq;
 import tech.powerjob.common.request.ServerStopInstanceReq;
 import tech.powerjob.common.response.AskResponse;
 import tech.powerjob.common.response.InstanceInfoDTO;
+import tech.powerjob.common.utils.CommonUtils;
 import tech.powerjob.remote.framework.base.URL;
 import tech.powerjob.server.common.constants.InstanceType;
 import tech.powerjob.server.common.module.WorkerInfo;
@@ -76,11 +83,12 @@ public class InstanceService {
      * @param appId             所属应用ID
      * @param jobParams         任务静态参数
      * @param instanceParams    任务实例参数，仅 OpenAPI 创建 或者 工作流任务 时存在
+     * @param runDateParams     补数日期参数，仅 OpenAPI 创建 或者 工作流任务 时存在
      * @param wfInstanceId      工作流任务实例ID，仅工作流下的任务实例存在
      * @param expectTriggerTime 预期执行时间
      * @return 任务实例ID
      */
-    public InstanceInfoDO create(Long jobId, Long appId, String jobParams, String instanceParams, Long wfInstanceId, Long expectTriggerTime) {
+    public InstanceInfoDO create(Long jobId, Long appId, String jobParams, String instanceParams, String runDateParams, Long wfInstanceId, Long expectTriggerTime) {
 
         Long instanceId = idGenerateService.allocate();
         Date now = new Date();
@@ -100,6 +108,13 @@ public class InstanceService {
         newInstanceInfo.setLastReportTime(-1L);
         newInstanceInfo.setGmtCreate(now);
         newInstanceInfo.setGmtModified(now);
+        //修改: 添加数据日期
+        if (StringUtils.isNoneBlank(runDateParams)) {
+            RunParams workflowParams = JSON.parseObject(runDateParams, RunParams.class);
+            newInstanceInfo.setDataDate(workflowParams.getDataDate());
+        } else {
+            newInstanceInfo.setDataDate(CommonUtils.formatDate(now));
+        }
 
         instanceInfoRepository.save(newInstanceInfo);
         return newInstanceInfo;

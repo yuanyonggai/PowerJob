@@ -104,4 +104,9 @@ public class InstanceInfoDO {
 
     private Date gmtModified;
 
+    /**
+     * 数据日期
+     */
+    private String dataDate;
+
 }

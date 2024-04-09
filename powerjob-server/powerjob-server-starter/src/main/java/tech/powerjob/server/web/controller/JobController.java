@@ -1,6 +1,8 @@
 package tech.powerjob.server.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
+
+import tech.powerjob.common.model.RunParams;
 import tech.powerjob.common.request.http.SaveJobInfoRequest;
 import tech.powerjob.common.response.ResultDTO;
 import tech.powerjob.server.common.constants.SwitchableStatus;
@@ -8,8 +10,11 @@ import tech.powerjob.server.persistence.PageResult;
 import tech.powerjob.server.persistence.remote.model.JobInfoDO;
 import tech.powerjob.server.persistence.remote.repository.JobInfoRepository;
 import tech.powerjob.server.core.service.JobService;
+import tech.powerjob.server.core.workflow.ComplementService;
 import tech.powerjob.server.web.request.QueryJobInfoRequest;
 import tech.powerjob.server.web.response.JobInfoVO;
+
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,6 +23,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +44,8 @@ public class JobController {
     private JobService jobService;
     @Resource
     private JobInfoRepository jobInfoRepository;
+    @Resource
+    private ComplementService complementService;
 
     @PostMapping("/save")
     public ResultDTO<Void> saveJobInfo(@RequestBody SaveJobInfoRequest request) {
@@ -67,8 +76,18 @@ public class JobController {
     }
 
     @GetMapping("/run")
-    public ResultDTO<Long> runImmediately(String appId, String jobId, @RequestParam(required = false) String instanceParams) {
-        return ResultDTO.success(jobService.runJob(Long.valueOf(appId), Long.valueOf(jobId), instanceParams, 0L));
+    public ResultDTO<Long> runImmediately(String appId, String jobId,
+            @RequestParam(required = false) String instanceParams,
+            @RequestParam(required = false) String runDateParams) {
+        // 修改：支持补数，传递时间段
+        if (StringUtils.isNoneBlank(runDateParams)) {
+            RunParams workflowParams = JSON.parseObject(runDateParams, RunParams.class);
+            // 对参数进行校验
+            workflowParams.valid();
+            return ResultDTO.success(complementService.runComplement(Long.valueOf(appId), Long.valueOf(jobId), LocalDate.parse(workflowParams.getDataDateStart()), LocalDate.parse(workflowParams.getDataDateEnd()), false));
+        } else {
+            return ResultDTO.success(jobService.runJob(Long.valueOf(appId), Long.valueOf(jobId), instanceParams, runDateParams, 0L));
+        }
     }
 
     @PostMapping("/list")

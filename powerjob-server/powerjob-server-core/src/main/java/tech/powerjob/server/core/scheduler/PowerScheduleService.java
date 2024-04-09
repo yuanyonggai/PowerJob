@@ -1,5 +1,6 @@
 package tech.powerjob.server.core.scheduler;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -11,8 +12,12 @@ import org.springframework.util.CollectionUtils;
 import tech.powerjob.common.enums.InstanceStatus;
 import tech.powerjob.common.enums.TimeExpressionType;
 import tech.powerjob.common.model.LifeCycle;
+import tech.powerjob.common.model.RunParams;
+import tech.powerjob.server.common.PowerJobServerConfigKey;
 import tech.powerjob.server.common.constants.SwitchableStatus;
 import tech.powerjob.server.common.timewheel.holder.InstanceTimeWheelService;
+import tech.powerjob.server.common.utils.PropertyUtils;
+import tech.powerjob.server.common.utils.TimePlaceholderUtils;
 import tech.powerjob.server.core.DispatchService;
 import tech.powerjob.server.core.instance.InstanceService;
 import tech.powerjob.server.core.service.JobService;
@@ -166,8 +171,15 @@ public class PowerScheduleService {
                 Map<Long, Long> jobId2InstanceId = Maps.newHashMap();
                 log.info("[NormalScheduler] These {} jobs will be scheduled: {}.", timeExpressionType.name(), jobInfos);
 
+                RunParams workflowParams = new RunParams();
+                String defaultDate = TimePlaceholderUtils.replacePlaceholders(
+                        PropertyUtils.getProperties().getProperty(PowerJobServerConfigKey.DEFAULT_JOB_DATEFORMAT),
+                        new Date(), true);
+                workflowParams.setDataDate(defaultDate);
+                String runDateParams = JSON.toJSONString(workflowParams);
+
                 jobInfos.forEach(jobInfo -> {
-                    Long instanceId = instanceService.create(jobInfo.getId(), jobInfo.getAppId(), jobInfo.getJobParams(), null, null, jobInfo.getNextTriggerTime()).getInstanceId();
+                    Long instanceId = instanceService.create(jobInfo.getId(), jobInfo.getAppId(), jobInfo.getJobParams(), null, runDateParams, null, jobInfo.getNextTriggerTime()).getInstanceId();
                     jobId2InstanceId.put(jobInfo.getId(), instanceId);
                 });
                 instanceInfoRepository.flush();
@@ -218,8 +230,15 @@ public class PowerScheduleService {
 
             wfInfos.forEach(wfInfo -> {
 
+                RunParams workflowParams = new RunParams();
+                String defaultDate = TimePlaceholderUtils.replacePlaceholders(
+                        PropertyUtils.getProperties().getProperty(PowerJobServerConfigKey.DEFAULT_JOB_DATEFORMAT),
+                        new Date(), true);
+                workflowParams.setDataDate(defaultDate);
+                String initParams = JSON.toJSONString(workflowParams);
+
                 // 1. 先生成调度记录，防止不调度的情况发生
-                Long wfInstanceId = workflowInstanceManager.create(wfInfo, null, wfInfo.getNextTriggerTime(), null);
+                Long wfInstanceId = workflowInstanceManager.create(wfInfo, initParams, wfInfo.getNextTriggerTime(), null);
 
                 // 2. 推入时间轮，准备调度执行
                 long delay = wfInfo.getNextTriggerTime() - System.currentTimeMillis();
@@ -276,7 +295,7 @@ public class PowerScheduleService {
                             log.info("[FrequentScheduler] disable frequent job,id:{}.", jobInfoDO.getId());
                         } else if (lifeCycle.getStart() == null || lifeCycle.getStart() < System.currentTimeMillis() + SCHEDULE_RATE * 2) {
                             log.info("[FrequentScheduler] schedule frequent job,id:{}.", jobInfoDO.getId());
-                            jobService.runJob(jobInfoDO.getAppId(), jobId, null, Optional.ofNullable(lifeCycle.getStart()).orElse(0L) - System.currentTimeMillis());
+                            jobService.runJob(jobInfoDO.getAppId(), jobId, null, null, Optional.ofNullable(lifeCycle.getStart()).orElse(0L) - System.currentTimeMillis());
                         }
                     });
                 });

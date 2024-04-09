@@ -28,6 +28,10 @@ public class PowerJobServerConfigKey {
      * 是否启用 Swagger-UI，默认关闭
      */
     public static final String SWAGGER_UI_ENABLE = "oms.swagger.enable";
+    /**
+     * 调度日期格式(用户T-n配置)
+     */
+    public static final String DEFAULT_JOB_DATEFORMAT = "oms.job.defaultJobDateFormat";
 
     /**
      * 钉钉报警相关

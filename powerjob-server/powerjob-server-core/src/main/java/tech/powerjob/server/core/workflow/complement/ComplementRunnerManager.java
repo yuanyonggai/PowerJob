@@ -1,21 +1,37 @@
 package tech.powerjob.server.core.workflow.complement;
 
+import java.lang.Thread.State;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PreDestroy;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.powerjob.common.enums.WorkflowInstanceStatus;
 import tech.powerjob.common.exception.PowerJobException;
+import tech.powerjob.server.core.service.JobService;
 import tech.powerjob.server.core.workflow.WorkflowService;
-import tech.powerjob.server.core.workflow.complement.event.*;
+import tech.powerjob.server.core.workflow.complement.event.Event;
 import tech.powerjob.server.core.workflow.complement.event.EventListener;
-import tech.powerjob.server.core.workflow.complement.vo.FlowComplementVO;
+import tech.powerjob.server.core.workflow.complement.event.EventReporter;
+import tech.powerjob.server.core.workflow.complement.event.EventType;
+import tech.powerjob.server.core.workflow.complement.vo.JobComplementVO;
+import tech.powerjob.server.persistence.remote.repository.InstanceInfoRepository;
 import tech.powerjob.server.persistence.remote.repository.WorkflowInstanceInfoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import javax.annotation.PreDestroy;
-import java.lang.Thread.State;
-import java.time.ZoneOffset;
-import java.util.*;
-import java.util.concurrent.*;
 
 /**
  * ComplementRunner manager for the server side execution.
@@ -50,31 +66,27 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
 
     final private WorkflowService workflowService;
 
+    final private JobService jobService;
+
     final private WorkflowInstanceInfoRepository workflowInstanceInfoRepository;
+
+    final private InstanceInfoRepository instanceInfoRepository;
 
     @Autowired
     public ComplementRunnerManager(EventReporter eventReporter,
-                                   WorkflowService workflowService,                                   
-                                   WorkflowInstanceInfoRepository workflowInstanceInfoRepository) {
+            WorkflowService workflowService,
+            JobService jobService,
+            WorkflowInstanceInfoRepository workflowInstanceInfoRepository,
+            InstanceInfoRepository instanceInfoRepository) {
         this.eventReporter = eventReporter;
         this.workflowService = workflowService;
+        this.jobService = jobService;
         this.workflowInstanceInfoRepository = workflowInstanceInfoRepository;
+        this.instanceInfoRepository = instanceInfoRepository;
         this.numThreads = DEFAULT_NUM_EXECUTING_FLOWS;
         this.executorService = createExecutorService(this.numThreads);
         this.cleanerThread = new CleanerThread();
         this.cleanerThread.start();
-
-        // PropertyChangeListener propertyChangeListener = evt -> {
-        //     if (ListenerConcurrentHashMap.PROP_PUT.equals(evt.getPropertyName())) {
-        //         distributedJobService.globalAddRunningFlowComplementKey(((Map.Entry<String, ?>) evt.getNewValue()).getKey());
-        //     } else if (ListenerConcurrentHashMap.PROP_REMOVE.equals(evt.getPropertyName())) {
-        //         distributedJobService.globalRemoveRunningFlowComplementKey(((Map.Entry<String, ?>) evt.getOldValue()).getKey());
-        //     }
-
-        // };
-
-        //runningComplements.addPropertyChangeListener(propertyChangeListener);
-
     }
 
     private TrackingThreadPool createExecutorService(final int nThreads) {
@@ -86,15 +98,8 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
                 new ThreadFactoryBuilder().setDaemon(true).build(), this);
     }
 
-    public void submitComplement(final FlowComplementVO flowComplementVO) {
-        // if (isAlreadyRunning(flowComplementVO.getWorkflowId())) {
-        //     return;
-        // }
+    public void submitComplement(final JobComplementVO flowComplementVO) {
         final ComplementRunner runner = createComplementRunner(flowComplementVO);
-        // Check again.
-        // if (isAlreadyRunning(flowComplementKey)) {
-        //     return;
-        // }
         submitComplementRunner(runner);
     }
 
@@ -105,10 +110,18 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
         return false;
     }
 
-    private ComplementRunner createComplementRunner(final FlowComplementVO flowComplementVO) {
-        final ComplementRunner runner = new ComplementRunner(flowComplementVO, workflowService, workflowInstanceInfoRepository, eventReporter);
+    private ComplementRunner createComplementRunner(final JobComplementVO flowComplementVO) {
+        ComplementRunner runner = null;
+        if (flowComplementVO.isWorkflow()) {
+            runner = new ComplementRunner(flowComplementVO, workflowService, null, workflowInstanceInfoRepository, null,
+                    eventReporter);
+        } else {
+            runner = new ComplementRunner(flowComplementVO, null, jobService, null, instanceInfoRepository,
+                    eventReporter);
+        }
+
         runner.addListener(this);
-        //configureFlowLevelMetrics(runner); //以后扩展
+        // configureFlowLevelMetrics(runner);
         return runner;
     }
 
@@ -134,10 +147,11 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
     }
 
     public void cancelComplement(final Long workflowId) {
-        log.info("cancelComplement： workflowId->{} ", workflowId);
+        log.info("cancelComplement: workflowId or jobId->{} ", workflowId);
         final ComplementRunner runner = this.runningComplements.get(workflowId);
         if (runner == null) {
-            //throw new ExecutorManagerException("complementation " + workflowId + " is not running.");
+            // throw new ExecutorManagerException("complementation " + workflowId + " is not
+            // running.");
             log.info("作业实例{}已经停止执行", workflowId);
         } else {
             this.runningComplements.remove(runner.getFlowComplementVO().getWorkflowId());
@@ -150,20 +164,13 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
     public void handleEvent(final Event event) {
         if (event.getType() == EventType.COMPLEMENT_FINISHED || event.getType() == EventType.COMPLEMENT_STARTED) {
             final ComplementRunner complementRunner = (ComplementRunner) event.getRunner();
-            final FlowComplementVO flowComplementVO = complementRunner.getFlowComplementVO();
+            final JobComplementVO flowComplementVO = complementRunner.getFlowComplementVO();
 
             if (event.getType() == EventType.COMPLEMENT_FINISHED) {
-                log.info("workflowId " + flowComplementVO.getWorkflowId() + " complement is finished.");
-                this.runningComplements.remove(flowComplementVO.getWorkflowId());
-                //用于多admin时定位admin的位置
-                //amlDmpCache.deleteObject(RUNNING_FLOW_COMPLEMENT_KEY_CACHE_PREFIX + flowComplementVO.getFlowComplementKey());
+                log.info("workflowId or jobId " + flowComplementVO.getWorkflowId() + " complement is finished.");
+                this.runningComplements.remove(flowComplementVO.getWorkflowId());                
             } else if (event.getType() == EventType.COMPLEMENT_STARTED) {
-                log.info("workflowId: " + flowComplementVO.getWorkflowId() + " complement is started.");
-                //用于多admin时定位admin的位置
-                //amlDmpCache.setCacheObject(RUNNING_FLOW_COMPLEMENT_KEY_CACHE_PREFIX+ flowComplementVO.getFlowComplementKey(), adminConfig.getAdminAddresses(), 10, TimeUnit.DAYS);
-                // add flow level SLA checker
-                //this.triggerManager.addTrigger(flow.getExecutionId(), SlaOption.getFlowLevelSLAOptions(flow));
-                //在这里保留 对外暴露信息用于收集状态
+                log.info("workflowId or jobId: " + flowComplementVO.getWorkflowId() + " complement is started.");                
             }
         }
     }
@@ -250,7 +257,8 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
     }
 
     /**
-     * This shuts down the complement runner. The call is blocking and awaits execution of all jobs.
+     * This shuts down the complement runner. The call is blocking and awaits
+     * execution of all jobs.
      */
     @PreDestroy
     public void shutdown() {
@@ -272,13 +280,14 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
     }
 
     /**
-     * This attempts shuts down the complement runner immediately (unsafe). This doesn't wait for jobs to
+     * This attempts shuts down the complement runner immediately (unsafe). This
+     * doesn't wait for jobs to
      * finish but interrupts all threads.
      */
     public void shutdownNow() {
         log.warn("Shutting down ComplementRunnerManager now...");
         this.executorService.shutdownNow();
-        //this.triggerManager.shutdown();
+        // this.triggerManager.shutdown();
     }
 
     private class CleanerThread extends Thread {
@@ -299,10 +308,12 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
             this.interrupt();
         }
 
-        private boolean isFlowRunningLongerThan(final FlowComplementVO flowComplementVO, final long complementMaxRunningTimeInMins) {            
-            return (!WorkflowInstanceStatus.FINISHED_STATUS.contains(flowComplementVO.getComplementStatus().getV())) 
-            && flowComplementVO.getStartTime().toInstant(ZoneOffset.of("+8")).toEpochMilli() > 0 
-            && TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - flowComplementVO.getStartTime().toInstant(ZoneOffset.of("+8")).toEpochMilli()) >= complementMaxRunningTimeInMins;
+        private boolean isFlowRunningLongerThan(final JobComplementVO flowComplementVO,
+                final long complementMaxRunningTimeInMins) {
+            return (!WorkflowInstanceStatus.FINISHED_STATUS.contains(flowComplementVO.getComplementStatus().getV()))
+                    && flowComplementVO.getStartTime().toInstant(ZoneOffset.of("+8")).toEpochMilli() > 0
+                    && TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - flowComplementVO.getStartTime()
+                            .toInstant(ZoneOffset.of("+8")).toEpochMilli()) >= complementMaxRunningTimeInMins;
         }
 
         @Override
@@ -316,12 +327,22 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
                         // Cleanup old stuff.
                         final long currentTime = System.currentTimeMillis();
 
-                        if (this.complementMaxRunningTimeInMins > 0 && currentTime - LONG_RUNNING_FLOW_KILLING_INTERVAL_MS > this.lastLongRunningFlowCleanTime) {
-                            ComplementRunnerManager.log.info(String.format("Killing long jobs running longer than %s mins", this.complementMaxRunningTimeInMins));
-                            for (final ComplementRunner complementRunner : ComplementRunnerManager.this.runningComplements.values()) {
-                                if (isFlowRunningLongerThan(complementRunner.getFlowComplementVO(), this.complementMaxRunningTimeInMins)) {
-                                    ComplementRunnerManager.log.info(String.format("Killing job [id: %s, status: %s]. It has been running for %s mins", complementRunner.getFlowComplementVO().getWorkflowId(),
-                                            complementRunner.getFlowComplementVO().getComplementStatus(), TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - complementRunner.getFlowComplementVO().getStartTime().toInstant(ZoneOffset.of("+8")).toEpochMilli())));
+                        if (this.complementMaxRunningTimeInMins > 0 && currentTime
+                                - LONG_RUNNING_FLOW_KILLING_INTERVAL_MS > this.lastLongRunningFlowCleanTime) {
+                            ComplementRunnerManager.log
+                                    .info(String.format("Killing long jobs running longer than %s mins",
+                                            this.complementMaxRunningTimeInMins));
+                            for (final ComplementRunner complementRunner : ComplementRunnerManager.this.runningComplements
+                                    .values()) {
+                                if (isFlowRunningLongerThan(complementRunner.getFlowComplementVO(),
+                                        this.complementMaxRunningTimeInMins)) {
+                                    ComplementRunnerManager.log.info(String.format(
+                                            "Killing job [id: %s, status: %s]. It has been running for %s mins",
+                                            complementRunner.getFlowComplementVO().getWorkflowId(),
+                                            complementRunner.getFlowComplementVO().getComplementStatus(),
+                                            TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis()
+                                                    - complementRunner.getFlowComplementVO().getStartTime()
+                                                            .toInstant(ZoneOffset.of("+8")).toEpochMilli())));
                                     complementRunner.kill();
                                 }
                             }
@@ -333,7 +354,8 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
                         ComplementRunnerManager.log.info("Interrupted. Probably to shut down.");
                         Thread.currentThread().interrupt();
                     } catch (final Throwable t) {
-                        ComplementRunnerManager.log.warn("Uncaught throwable, please look into why it is not caught", t);
+                        ComplementRunnerManager.log.warn("Uncaught throwable, please look into why it is not caught",
+                                t);
                     }
                 }
             }

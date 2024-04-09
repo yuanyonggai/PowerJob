@@ -1,28 +1,32 @@
 package tech.powerjob.server.web.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import tech.powerjob.common.OmsConstant;
 import tech.powerjob.common.enums.InstanceStatus;
 import tech.powerjob.common.response.ResultDTO;
+import tech.powerjob.server.common.PowerJobServerConfigKey;
 import tech.powerjob.server.common.constants.SwitchableStatus;
 import tech.powerjob.server.common.module.WorkerInfo;
+import tech.powerjob.server.common.utils.PropertyUtils;
+import tech.powerjob.server.common.utils.TimePlaceholderUtils;
 import tech.powerjob.server.persistence.remote.repository.InstanceInfoRepository;
 import tech.powerjob.server.persistence.remote.repository.JobInfoRepository;
 import tech.powerjob.server.remote.server.self.ServerInfoService;
 import tech.powerjob.server.remote.worker.WorkerClusterQueryService;
 import tech.powerjob.server.web.response.SystemOverviewVO;
 import tech.powerjob.server.web.response.WorkerStatusVO;
-
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
 
 /**
  * 系统信息控制器（服务于前端首页）
@@ -72,6 +76,15 @@ public class SystemInfoController {
         overview.setServerInfo(serverInfoService.fetchServiceInfo());
 
         return ResultDTO.success(overview);
+    }
+
+    @GetMapping("/defaultJobDate")
+    public ResultDTO<String> defaultJobDate() {
+        String defaultDate = TimePlaceholderUtils.replacePlaceholders(
+                PropertyUtils.getProperties().getProperty(PowerJobServerConfigKey.DEFAULT_JOB_DATEFORMAT), new Date(),
+                true);
+        defaultDate = "{\"dataDateStart\":\""+defaultDate+"\",\"dataDateEnd\":\""+defaultDate+"\"}";
+        return ResultDTO.success(defaultDate);
     }
 
 }

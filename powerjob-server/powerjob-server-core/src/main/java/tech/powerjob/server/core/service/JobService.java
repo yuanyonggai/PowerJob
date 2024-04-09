@@ -25,7 +25,7 @@ public interface JobService {
 
     List<JobInfoDTO> queryJob(PowerQuery powerQuery);
 
-    long runJob(Long appId, Long jobId, String instanceParams, Long delay);
+    long runJob(Long appId, Long jobId, String instanceParams, String runDateParams, Long delay);
 
     void deleteJob(Long jobId);
 

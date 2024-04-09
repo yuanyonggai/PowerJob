@@ -1,5 +1,7 @@
 package tech.powerjob.common.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -8,7 +10,7 @@ import tech.powerjob.common.utils.CommonUtils;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
-public class WorkflowParams {
+public class RunParams {
     /**
      * 数据日期
      */
@@ -23,7 +25,12 @@ public class WorkflowParams {
     private String dataDateEnd;
 
     public void valid() {
-        CommonUtils.requireNonNull(this.dataDateStart, "dataDateStart can't be empty");
-        CommonUtils.requireNonNull(this.dataDateEnd, "dataDateEnd can't be empty");
+        if (StringUtils.isBlank(dataDate)) {
+            CommonUtils.requireNonNull(this.dataDateStart, "dataDateStart can't be empty");
+            CommonUtils.requireNonNull(this.dataDateEnd, "dataDateEnd can't be empty");
+        } else {
+            this.dataDateStart = this.dataDate;
+            this.dataDateEnd = this.dataDate;
+        }
     }
 }

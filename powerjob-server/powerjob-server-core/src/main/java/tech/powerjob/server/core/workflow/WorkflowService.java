@@ -12,11 +12,15 @@ import tech.powerjob.common.enums.TimeExpressionType;
 import tech.powerjob.common.exception.PowerJobException;
 import tech.powerjob.common.model.LifeCycle;
 import tech.powerjob.common.model.PEWorkflowDAG;
+import tech.powerjob.common.model.RunParams;
 import tech.powerjob.common.request.http.SaveWorkflowNodeRequest;
 import tech.powerjob.common.request.http.SaveWorkflowRequest;
+import tech.powerjob.server.common.PowerJobServerConfigKey;
 import tech.powerjob.server.common.SJ;
 import tech.powerjob.server.common.constants.SwitchableStatus;
 import tech.powerjob.server.common.timewheel.holder.InstanceTimeWheelService;
+import tech.powerjob.server.common.utils.PropertyUtils;
+import tech.powerjob.server.common.utils.TimePlaceholderUtils;
 import tech.powerjob.server.core.scheduler.TimingStrategyService;
 import tech.powerjob.server.core.service.NodeValidateService;
 import tech.powerjob.server.core.workflow.algorithm.WorkflowDAG;
@@ -269,7 +273,15 @@ public class WorkflowService {
     @DesignateServer
     public Long runWorkflow(Long wfId, Long appId, String initParams, Long delay) {
 
-        //TO_DO修改：启动参数加入数据日期参数，根据配置文件动态设置
+        //修改：启动参数加入数据日期参数，根据配置文件动态设置.如果initParams是空,加入默认日期(依据配置文件计算)
+        if (StringUtils.isBlank(initParams)) {
+            RunParams workflowParams = new RunParams();
+            String defaultDate = TimePlaceholderUtils.replacePlaceholders(PropertyUtils.getProperties().getProperty(PowerJobServerConfigKey.DEFAULT_JOB_DATEFORMAT), new Date(), true);
+            workflowParams.setDataDate(defaultDate);
+            //workflowParams.setDataDateStart(workflowParams.getDataDate());
+            //workflowParams.setDataDateEnd(workflowParams.getDataDate());
+            initParams = JSON.toJSONString(workflowParams);
+        }
 
         delay = delay == null ? 0 : delay;
         WorkflowInfoDO wfInfo = permissionCheck(wfId, appId);

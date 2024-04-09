@@ -1,8 +1,6 @@
 package tech.powerjob.server.web.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import tech.powerjob.server.common.module.ServerInfo;
 
 /**
@@ -27,4 +25,9 @@ public class SystemOverviewVO {
     private String serverTime;
 
     private ServerInfo serverInfo;
+
+    /**
+     * 默认调度日期参数
+     */
+    private String defaultJobDate;
 }

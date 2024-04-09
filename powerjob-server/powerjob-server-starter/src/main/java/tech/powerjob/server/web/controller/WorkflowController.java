@@ -1,6 +1,6 @@
 package tech.powerjob.server.web.controller;
 
-import tech.powerjob.common.model.WorkflowParams;
+import tech.powerjob.common.model.RunParams;
 import tech.powerjob.common.request.http.SaveWorkflowNodeRequest;
 import tech.powerjob.common.request.http.SaveWorkflowRequest;
 import tech.powerjob.common.response.ResultDTO;
@@ -9,7 +9,7 @@ import tech.powerjob.server.persistence.PageResult;
 import tech.powerjob.server.persistence.remote.model.WorkflowInfoDO;
 import tech.powerjob.server.persistence.remote.model.WorkflowNodeInfoDO;
 import tech.powerjob.server.persistence.remote.repository.WorkflowInfoRepository;
-import tech.powerjob.server.core.workflow.WorkflowComplementService;
+import tech.powerjob.server.core.workflow.ComplementService;
 import tech.powerjob.server.core.workflow.WorkflowService;
 import tech.powerjob.server.web.request.QueryWorkflowInfoRequest;
 import tech.powerjob.server.web.response.WorkflowInfoVO;
@@ -38,7 +38,7 @@ public class WorkflowController {
     @Resource
     private WorkflowService workflowService;
     @Resource
-    private WorkflowComplementService workflowComplementService;
+    private ComplementService complementService;
     @Resource
     private WorkflowInfoRepository workflowInfoRepository;
 
@@ -97,10 +97,10 @@ public class WorkflowController {
             @RequestParam(required = false) String initParams) {
         // 修改：支持补数，传递时间段
         if (StringUtils.isNoneBlank(initParams)) {
-            WorkflowParams workflowParams = JSON.parseObject(initParams, WorkflowParams.class);
+            RunParams workflowParams = JSON.parseObject(initParams, RunParams.class);
             // 对参数进行校验
             workflowParams.valid();
-            return ResultDTO.success(workflowComplementService.runComplement(appId, workflowId, LocalDate.parse(workflowParams.getDataDateStart()), LocalDate.parse(workflowParams.getDataDateEnd())));
+            return ResultDTO.success(complementService.runComplement(appId, workflowId, LocalDate.parse(workflowParams.getDataDateStart()), LocalDate.parse(workflowParams.getDataDateEnd()), true));
         } else {
             return ResultDTO.success(workflowService.runWorkflow(workflowId, appId, initParams, delay));
         }        

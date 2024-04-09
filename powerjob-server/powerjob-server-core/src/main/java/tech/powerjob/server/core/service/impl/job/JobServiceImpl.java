@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,16 @@ import tech.powerjob.common.enums.TimeExpressionType;
 import tech.powerjob.common.exception.PowerJobException;
 import tech.powerjob.common.model.AlarmConfig;
 import tech.powerjob.common.model.LifeCycle;
+import tech.powerjob.common.model.RunParams;
 import tech.powerjob.common.request.http.SaveJobInfoRequest;
 import tech.powerjob.common.response.JobInfoDTO;
 import tech.powerjob.common.serialize.JsonUtils;
+import tech.powerjob.server.common.PowerJobServerConfigKey;
 import tech.powerjob.server.common.SJ;
 import tech.powerjob.server.common.constants.SwitchableStatus;
 import tech.powerjob.server.common.timewheel.holder.InstanceTimeWheelService;
+import tech.powerjob.server.common.utils.PropertyUtils;
+import tech.powerjob.server.common.utils.TimePlaceholderUtils;
 import tech.powerjob.server.core.DispatchService;
 import tech.powerjob.server.core.instance.InstanceService;
 import tech.powerjob.server.core.scheduler.TimingStrategyService;
@@ -174,18 +180,27 @@ public class JobServiceImpl implements JobService {
      *
      * @param jobId          任务ID
      * @param instanceParams 任务实例参数（仅 OpenAPI 存在）
+     * @param runDateParams  补数日期参数（仅 OpenAPI 存在）
      * @param delay          延迟时间，单位 毫秒
      * @return 任务实例ID
      */
     @Override
     @DesignateServer
-    public long runJob(Long appId, Long jobId, String instanceParams, Long delay) {
+    public long runJob(Long appId, Long jobId, String instanceParams, String runDateParams, Long delay) {
+
+        //修改：启动参数加入数据日期参数，根据配置文件动态设置.如果initParams是空,加入默认日期(依据配置文件计算)
+        if (StringUtils.isBlank(runDateParams)) {
+            RunParams jobParams = new RunParams();
+            String defaultDate = TimePlaceholderUtils.replacePlaceholders(PropertyUtils.getProperties().getProperty(PowerJobServerConfigKey.DEFAULT_JOB_DATEFORMAT), new Date(), true);
+            jobParams.setDataDate(defaultDate);
+            runDateParams = JSON.toJSONString(jobParams);
+        }
 
         delay = delay == null ? 0 : delay;
         JobInfoDO jobInfo = jobInfoRepository.findById(jobId).orElseThrow(() -> new IllegalArgumentException("can't find job by id:" + jobId));
 
-        log.info("[Job-{}] try to run job in app[{}], instanceParams={},delay={} ms.", jobInfo.getId(), appId, instanceParams, delay);
-        final InstanceInfoDO instanceInfo = instanceService.create(jobInfo.getId(), jobInfo.getAppId(), jobInfo.getJobParams(), instanceParams, null, System.currentTimeMillis() + Math.max(delay, 0));
+        log.info("[Job-{}] try to run job in app[{}], instanceParams={},runDateParams={},delay={} ms.", jobInfo.getId(), appId, instanceParams,runDateParams,delay);
+        final InstanceInfoDO instanceInfo = instanceService.create(jobInfo.getId(), jobInfo.getAppId(), jobInfo.getJobParams(), instanceParams, runDateParams, null, System.currentTimeMillis() + Math.max(delay, 0));
         instanceInfoRepository.flush();
         if (delay <= 0) {
             dispatchService.dispatch(jobInfo, instanceInfo.getInstanceId(), Optional.of(instanceInfo),Optional.empty());
