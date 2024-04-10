@@ -10,7 +10,7 @@ import java.util.*;
 
 @Data
 public final class JobComplementVO {
-    //工作流id
+    //实际存的是工作流id or jobId
     private Long workflowId;
 
     //应用id
@@ -26,7 +26,7 @@ public final class JobComplementVO {
     private LocalDate currentDataDate;
 
     //工作流补数状态
-    private WorkflowInstanceStatus complementStatus;
+    private WorkflowInstanceStatus workflowInstanceStatus;
     
     //任务补数状态
     private InstanceStatus instanceStatus;
@@ -41,16 +41,13 @@ public final class JobComplementVO {
     private LocalDateTime startTime;
 
     //结束时间
-    private LocalDateTime endTime;
-
-    //是否并行
-    private boolean parallel;
-
-    //自定义参数
-    private Map<String, String> flowData;
+    private LocalDateTime endTime;    
 
     //是否工作流
     private boolean isWorkflow = true;
+
+    //实例参数
+    private String instanceParams;
 
     public JobComplementVO() {
     }
@@ -59,7 +56,7 @@ public final class JobComplementVO {
         this.workflowId = workflowId;
         this.startDataDate = startDataDate;
         this.endDataDate = endDataDate;
-        this.complementStatus = WorkflowInstanceStatus.WAITING;
+        this.workflowInstanceStatus = WorkflowInstanceStatus.WAITING;
         this.instanceStatus = InstanceStatus.WAITING_DISPATCH;
     }
 
@@ -72,7 +69,7 @@ public final class JobComplementVO {
         flowComplementVO.setWorkflowId(this.workflowId);
         flowComplementVO.setStartDataDate(this.startDataDate);
         flowComplementVO.setEndDataDate(this.endDataDate);
-        flowComplementVO.setComplementStatus(this.complementStatus);
+        flowComplementVO.setWorkflowInstanceStatus(this.workflowInstanceStatus);
         flowComplementVO.setInstanceStatus(this.instanceStatus);
         return flowComplementVO;
     }

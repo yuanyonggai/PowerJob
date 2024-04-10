@@ -88,7 +88,7 @@ public class ComplementRunner extends EventHandler implements Runnable {
             } else {
                 logger.info("作业流id or jobId:{} 异常：{}", flowComplementVO.getWorkflowId(), e);
             }
-            this.flowComplementVO.setComplementStatus(WorkflowInstanceStatus.STOPPED);
+            this.flowComplementVO.setWorkflowInstanceStatus(WorkflowInstanceStatus.STOPPED);
             this.flowComplementVO.setInstanceStatus(InstanceStatus.STOPPED);
         } finally {
             try {
@@ -140,20 +140,20 @@ public class ComplementRunner extends EventHandler implements Runnable {
                         this.flowComplementVO.getStartDataDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
                 workflowParams.setDataDateEnd(
                         this.flowComplementVO.getEndDataDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-                String initParams = JSON.toJSONString(workflowParams);
+                String runDateParams = JSON.toJSONString(workflowParams);
 
                 if (this.flowComplementVO.isWorkflow()) {
                     Long wfInstanceId = workflowService.runWorkflow(flowComplementVO.getWorkflowId(),
-                            flowComplementVO.getAppId(), initParams, 0L);
+                            flowComplementVO.getAppId(), runDateParams, 0L);
                     blockFlowStatus = new BlockExecutionStatus(wfInstanceId, workflowInstanceInfoRepository, null, 20);
                     WorkflowInstanceStatus status = blockFlowStatus.blockOnWorkflowFinishedStatus();
                     if (!status.equals(WorkflowInstanceStatus.SUCCEED)) {
                         throw new PowerJobException("workflowInstanceId [" + wfInstanceId + "] execute not success!");
                     }
                 } else {
-                    Long instanceId = jobService.runJob(flowComplementVO.getWorkflowId(), flowComplementVO.getAppId(),
-                            null,
-                            initParams, 0L);
+                    Long instanceId = jobService.runJob(flowComplementVO.getAppId(), flowComplementVO.getWorkflowId(),
+                            this.flowComplementVO.getInstanceParams(),
+                            runDateParams, 0L);
                     blockFlowStatus = new BlockExecutionStatus(instanceId, null, instanceInfoRepository, 20);
                     InstanceStatus status = blockFlowStatus.blockOnJobFinishedStatus();
                     if (!status.equals(InstanceStatus.SUCCEED)) {
@@ -173,7 +173,7 @@ public class ComplementRunner extends EventHandler implements Runnable {
                 return;
             }
             logger.info("Kill has been called on complement workflowId: " + flowComplementVO.getWorkflowId());
-            this.flowComplementVO.setComplementStatus(WorkflowInstanceStatus.STOPPED);
+            this.flowComplementVO.setWorkflowInstanceStatus(WorkflowInstanceStatus.STOPPED);
             // If the flowComplementVO is paused, then we'll also unpause
             this.flowComplementKilled = true;
 
@@ -228,7 +228,7 @@ public class ComplementRunner extends EventHandler implements Runnable {
                 final Map<String, String> flowMetadata = getFlowComplementMetadata(complementRunner);
                 flowMetadata.put("endTime", String.valueOf(flowComplementVO.getEndTime()));
                 if (flowComplementVO.isWorkflow()) {
-                    flowMetadata.put("ComplementStatus", String.valueOf(flowComplementVO.getComplementStatus()));
+                    flowMetadata.put("ComplementStatus", String.valueOf(flowComplementVO.getWorkflowInstanceStatus()));
                 } else {
                     flowMetadata.put("ComplementStatus", String.valueOf(flowComplementVO.getInstanceStatus()));
                 }

@@ -47,7 +47,7 @@ public class ComplementService {
     @DesignateServer
     @UseCacheLock(type = "runComplement", key = "#workflowId", concurrencyLevel = 1024)
     public Long runComplement(Long appId, Long workflowId, LocalDate dataDateStart, LocalDate dataDateEnd,
-            boolean isWorkFlow) {
+            boolean isWorkFlow, String instanceParams) {
         // 判断是否在运行,如果是抛出异常
         if (isWorkFlow) {
             int instanceConcurrency = workflowInstanceInfoRepository.countByWorkflowIdAndStatusIn(workflowId,
@@ -70,6 +70,7 @@ public class ComplementService {
         flowComplementVO.setWorkflowId(workflowId);
         flowComplementVO.setStartDataDate(dataDateStart);
         flowComplementVO.setEndDataDate(dataDateEnd);
+        flowComplementVO.setInstanceParams(instanceParams);
         complementRunnerManager.submitComplement(flowComplementVO);
         return workflowId;
     }

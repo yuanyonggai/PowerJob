@@ -100,7 +100,7 @@ public class WorkflowController {
             RunParams workflowParams = JSON.parseObject(initParams, RunParams.class);
             // 对参数进行校验
             workflowParams.valid();
-            return ResultDTO.success(complementService.runComplement(appId, workflowId, LocalDate.parse(workflowParams.getDataDateStart()), LocalDate.parse(workflowParams.getDataDateEnd()), true));
+            return ResultDTO.success(complementService.runComplement(appId, workflowId, LocalDate.parse(workflowParams.getDataDateStart()), LocalDate.parse(workflowParams.getDataDateEnd()), true, initParams));
         } else {
             return ResultDTO.success(workflowService.runWorkflow(workflowId, appId, initParams, delay));
         }        

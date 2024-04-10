@@ -17,6 +17,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
@@ -42,6 +43,12 @@ public abstract class AbstractScriptProcessor extends CommonBasicProcessor {
     protected ProcessResult process0(TaskContext context) throws Exception {
         OmsLogger omsLogger = context.getOmsLogger();
         String scriptParams = CommonUtils.parseParams(context);
+
+        //修改：待删除，测试用
+        Map<String, String> workflowContext = context.getWorkflowContext().fetchWorkflowContext();
+        log.info("工作流上下文数据:{}", workflowContext);
+        context.getWorkflowContext().appendData2WfContext("lastsqlok", 0);
+
         omsLogger.info("[SYSTEM] ScriptProcessor start to process, params: {}", scriptParams);
         if (scriptParams == null) {
             String message = "[SYSTEM] ScriptParams is null, please check jobParam configuration.";

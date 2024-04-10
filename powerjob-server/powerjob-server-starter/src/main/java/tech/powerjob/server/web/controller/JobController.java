@@ -84,7 +84,7 @@ public class JobController {
             RunParams workflowParams = JSON.parseObject(runDateParams, RunParams.class);
             // 对参数进行校验
             workflowParams.valid();
-            return ResultDTO.success(complementService.runComplement(Long.valueOf(appId), Long.valueOf(jobId), LocalDate.parse(workflowParams.getDataDateStart()), LocalDate.parse(workflowParams.getDataDateEnd()), false));
+            return ResultDTO.success(complementService.runComplement(Long.valueOf(appId), Long.valueOf(jobId), LocalDate.parse(workflowParams.getDataDateStart()), LocalDate.parse(workflowParams.getDataDateEnd()), false, instanceParams));
         } else {
             return ResultDTO.success(jobService.runJob(Long.valueOf(appId), Long.valueOf(jobId), instanceParams, runDateParams, 0L));
         }

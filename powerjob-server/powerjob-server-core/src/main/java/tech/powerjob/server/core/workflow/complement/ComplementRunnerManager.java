@@ -310,7 +310,7 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
 
         private boolean isFlowRunningLongerThan(final JobComplementVO flowComplementVO,
                 final long complementMaxRunningTimeInMins) {
-            return (!WorkflowInstanceStatus.FINISHED_STATUS.contains(flowComplementVO.getComplementStatus().getV()))
+            return (!WorkflowInstanceStatus.FINISHED_STATUS.contains(flowComplementVO.getWorkflowInstanceStatus().getV()))
                     && flowComplementVO.getStartTime().toInstant(ZoneOffset.of("+8")).toEpochMilli() > 0
                     && TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - flowComplementVO.getStartTime()
                             .toInstant(ZoneOffset.of("+8")).toEpochMilli()) >= complementMaxRunningTimeInMins;
@@ -339,7 +339,7 @@ public class ComplementRunnerManager implements EventListener, ThreadPoolExecuti
                                     ComplementRunnerManager.log.info(String.format(
                                             "Killing job [id: %s, status: %s]. It has been running for %s mins",
                                             complementRunner.getFlowComplementVO().getWorkflowId(),
-                                            complementRunner.getFlowComplementVO().getComplementStatus(),
+                                            complementRunner.getFlowComplementVO().getWorkflowInstanceStatus(),
                                             TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis()
                                                     - complementRunner.getFlowComplementVO().getStartTime()
                                                             .toInstant(ZoneOffset.of("+8")).toEpochMilli())));

@@ -54,6 +54,10 @@ public class InstanceInfoVO {
      * 结束时间（同理，需要格式化）
      */
     private String finishedTime;
+    /**
+     * 数据日期
+     */
+    private String dataDate;
 
     public static InstanceInfoVO from(InstanceInfoDO instanceInfoDo, String jobName) {
         InstanceInfoVO instanceInfoVO = new InstanceInfoVO();
