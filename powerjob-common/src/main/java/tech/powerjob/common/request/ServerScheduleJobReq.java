@@ -102,4 +102,6 @@ public class ServerScheduleJobReq implements PowerSerializable {
      * 高级运行时配置
      */
     private String advancedRuntimeConfig;
+
+    private String dataDate;
 }

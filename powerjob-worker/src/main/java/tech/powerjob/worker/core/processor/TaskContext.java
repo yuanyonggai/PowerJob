@@ -72,4 +72,6 @@ public class TaskContext {
      */
     private WorkflowContext workflowContext;
 
+    private String dataDate;
+
 }
