@@ -30,7 +30,7 @@ class SpringDatasourceSqlProcessorTest {
         EmbeddedDatabase database = builder.setType(EmbeddedDatabaseType.H2)
                 .addScript("classpath:db_init.sql")
                 .build();
-        springDatasourceSqlProcessor = new SpringDatasourceSqlProcessor(database);
+        springDatasourceSqlProcessor = new SpringDatasourceSqlProcessor(/* database */);
         // do nothing
         springDatasourceSqlProcessor.registerSqlValidator("fakeSqlValidator", (sql) -> true);
         // 排除掉包含 drop 的 SQL

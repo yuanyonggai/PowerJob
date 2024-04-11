@@ -1,16 +1,19 @@
 package tech.powerjob.samples.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import tech.powerjob.common.utils.CommonUtils;
+
+import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.h2.Driver;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import tech.powerjob.official.processors.impl.sql.SpringDatasourceSqlProcessor;
-import tech.powerjob.worker.PowerJobWorker;
+import tech.powerjob.samples.SampleApplication;
 
 import javax.sql.DataSource;
 
@@ -19,12 +22,12 @@ import javax.sql.DataSource;
  * @since 2021/3/10
  */
 @Configuration
-@ConditionalOnBean(PowerJobWorker.class)
+@ConditionalOnBean(SampleApplication.class)
 public class SqlProcessorConfiguration {
 
 
     @Bean
-    @DependsOn({"initPowerJob"})
+    @DependsOn({"sampleApplication"})
     public DataSource sqlProcessorDataSource() {
         String path = System.getProperty("user.home") + "/test/h2/" + CommonUtils.genUUID() + "/";
         String jdbcUrl = String.format("jdbc:h2:file:%spowerjob_sql_processor_db;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false", path);
@@ -39,10 +42,27 @@ public class SqlProcessorConfiguration {
         return new HikariDataSource(config);
     }
 
+    @Bean
+    @DependsOn({"sampleApplication"})
+    @ConfigurationProperties("spring.datasource.dynamic.datasource.amldmp")
+    public DataSource amldmpDataSource(){
+        return DruidDataSourceBuilder.create().build();
+    }
 
     @Bean
-    public SpringDatasourceSqlProcessor simpleSpringSqlProcessor(@Qualifier("sqlProcessorDataSource") DataSource dataSource) {
-        SpringDatasourceSqlProcessor springDatasourceSqlProcessor = new SpringDatasourceSqlProcessor(dataSource);
+    @DependsOn({"sampleApplication"})
+    @ConfigurationProperties("spring.datasource.dynamic.datasource.amldm")
+    public DataSource amldmDataSource(){
+        return DruidDataSourceBuilder.create().build();
+    }
+
+    @Bean("springDatasourceSqlProcessor")
+    //修改：删除默认数据源
+    public SpringDatasourceSqlProcessor simpleSpringSqlProcessor(DataSource amldmpDataSource, DataSource amldmDataSource) {
+        SpringDatasourceSqlProcessor springDatasourceSqlProcessor = new SpringDatasourceSqlProcessor();
+        //修改：添加多数据源
+        springDatasourceSqlProcessor.registerDataSource(DataSourceNames.amldmp, amldmpDataSource);
+        springDatasourceSqlProcessor.registerDataSource(DataSourceNames.amldm, amldmDataSource);
         // do nothing
         springDatasourceSqlProcessor.registerSqlValidator("fakeSqlValidator", sql -> true);
         // 排除掉包含 drop 的 SQL
@@ -51,5 +71,4 @@ public class SqlProcessorConfiguration {
         springDatasourceSqlProcessor.setSqlParser((sql, taskContext) -> sql);
         return springDatasourceSqlProcessor;
     }
-
 }

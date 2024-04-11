@@ -41,10 +41,14 @@ public class SpringDatasourceSqlProcessor extends AbstractSqlProcessor {
      *
      * @param defaultDataSource 默认数据源
      */
-    public SpringDatasourceSqlProcessor(DataSource defaultDataSource) {
+    public SpringDatasourceSqlProcessor() {
         dataSourceMap = Maps.newConcurrentMap();
-        registerDataSource(DEFAULT_DATASOURCE_NAME, defaultDataSource);
     }
+    //修改：删除默认数据源
+    // public SpringDatasourceSqlProcessor(DataSource defaultDataSource) {
+    //     dataSourceMap = Maps.newConcurrentMap();
+    //     registerDataSource(DEFAULT_DATASOURCE_NAME, defaultDataSource);
+    // }
 
     @Override
     Connection getConnection(SqlParams sqlParams, TaskContext taskContext) throws SQLException {

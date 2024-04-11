@@ -2,6 +2,8 @@ package tech.powerjob.official.processors.impl.sql;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
 import tech.powerjob.official.processors.util.CommonUtils;
 import tech.powerjob.official.processors.util.SecurityUtils;
 import tech.powerjob.worker.core.processor.TaskContext;
@@ -17,6 +19,7 @@ import java.util.Properties;
  * @author tjq
  * @since 2021/3/14
  */
+@Component("dynamicDatasourceSqlProcessor")
 public class DynamicDatasourceSqlProcessor extends AbstractSqlProcessor {
 
     @Override

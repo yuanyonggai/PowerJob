@@ -11,7 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @since 2020/4/17
  */
 @EnableScheduling
-@SpringBootApplication
+@SpringBootApplication(/* scanBasePackages={"tech.powerjob.official.processors.impl.sql","tech.powerjob.samples.config"} *//* ,
+ exclude = {DataSourceAutoConfiguration.class} */)
 public class SampleApplication {
     public static void main(String[] args) {
         SpringApplication.run(SampleApplication.class, args);
