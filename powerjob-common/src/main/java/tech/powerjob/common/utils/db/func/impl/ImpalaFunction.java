@@ -47,13 +47,18 @@ public class ImpalaFunction extends AbstractSQLFunction {
 
     @Override
     public String date_format(String dateStr, String dateFormatterStr) {
-        return "'"+dateStr+"'";
+        return "'" + dateStr + "'";
     }
 
 //    @Override
 //    public String diff_date(String var1, String var2) {
 //        return null;
 //    }
+
+    @Override
+    public String field_date_to_char_func(String dtdate, String dttype) {
+        return "cast(" + dtdate + " as string)";
+    }
 
     @Override
     public String table(String tableAlias) {
@@ -69,16 +74,6 @@ public class ImpalaFunction extends AbstractSQLFunction {
     public String get_partition_by(String groupFields, String orderFields) {
         String restr = "ROW_NUMBER() OVER(PARTITION BY " + groupFields + " ORDER BY " + orderFields + ")";
         return restr;
-    }
-
-    @Override
-    public String nvl_str(String column, String value) {
-        return " ifnull(" + column + ",'" + value + "')";
-    }
-
-    @Override
-    public String nvl_number(String column, int value) {
-        return " ifnull(" + column + "," + value + ")";
     }
 
     @Override
@@ -201,7 +196,7 @@ public class ImpalaFunction extends AbstractSQLFunction {
             dateStr = dateStr.substring(1);
             sep = "";
         }
-        return dateFormatterStr != null ? "to_date(" + sep + dateStr + sep + ",'" + dateFormatterStr + "') + " + days  : "to_date(" + sep + dateStr + sep + ",'yyyy-mm-dd') + " + days ;
+        return dateFormatterStr != null ? "to_date(" + sep + dateStr + sep + ",'" + dateFormatterStr + "') + " + days : "to_date(" + sep + dateStr + sep + ",'yyyy-mm-dd') + " + days;
 
     }
 

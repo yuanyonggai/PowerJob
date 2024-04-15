@@ -91,6 +91,13 @@ public interface SQLFunction {
     String field_to_date_func(String field, String dateFormatterStr);
 
     /**
+     * 日期字段转为字符
+     *
+     * @return
+     */
+    String field_date_to_char_func(String dtdate, String dateFormatterStr);
+
+    /**
      * set集合（逗号隔开）中查找是否存在findStr
      * @param findStr
      * @param setColumnName
@@ -199,7 +206,7 @@ public interface SQLFunction {
      *
      * @return
      */
-    String nvl_number(String column, int value);
+    String nvl_number(String column, String value);
 
     /**
      * 取行数

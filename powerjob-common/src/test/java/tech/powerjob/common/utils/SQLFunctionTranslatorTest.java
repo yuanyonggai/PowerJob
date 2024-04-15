@@ -14,9 +14,9 @@ public class SQLFunctionTranslatorTest {
         String sqltemplate3 = "@{fc.getConcat(fc.nvlStr('trade_occur_country',' '),fc.nvlStr('trade_occur_area',' '))}";
         String sqltemplate1 = "${SQL.field_to_date_func('a.case_batch','yyyy-mm-dd')}";
         String sqltemplate = " @{fc.subPartitionBy('t.name','')}";
-        String sqltemplate2 = " @{fc.prePartitionBy('t.name1',\"t.name\")}";
+        String sqltemplate2 = "@{fc.prePartitionBy('t.name1',\"t.name\")}";
 
-        String rs1 = SQLFunctionTranslator.trans("oracle", sqltemplate1, contextData);
+        String rs1 = SQLFunctionTranslator.trans("mysql", sqltemplate1, contextData);
 
         System.out.println(rs1);
     }

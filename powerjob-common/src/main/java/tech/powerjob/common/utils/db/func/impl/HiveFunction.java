@@ -90,7 +90,7 @@ public class HiveFunction extends AbstractSQLFunction {
     }
 
     @Override
-    public String nvl_number(String column, int value) {
+    public String nvl_number(String column, String value) {
         return " ifnull(" + column + "," + value + ")";
     }
 

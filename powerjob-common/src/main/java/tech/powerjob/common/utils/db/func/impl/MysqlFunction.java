@@ -2,7 +2,6 @@ package tech.powerjob.common.utils.db.func.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.powerjob.common.utils.JobDateUtil;
-import tech.powerjob.common.utils.db.func.SQLFunction;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,14 +21,19 @@ public class MysqlFunction extends AbstractSQLFunction {
 
     @Override
     public String str_to_date(String dateStr, String dateFormatterStr) {
+        String sep = "'";
+        if (dateStr.startsWith(COLUMN_FIELD_FLAG)) {
+            dateStr = dateStr.substring(1);
+            sep = "";
+        }
         dateFormatterStr = getMysqlFormatString(dateFormatterStr);
-        return dateFormatterStr != null ? "STR_TO_DATE('" + dateStr + "','" + dateFormatterStr + "')" : "STR_TO_DATE('" + dateStr + "','%Y-%m-%d')";
+        return dateFormatterStr != null ? "STR_TO_DATE(" + sep + dateStr + sep + ",'" + dateFormatterStr + "')" : "STR_TO_DATE(" + sep + dateStr + sep + ",'%Y-%m-%d')";
     }
 
     @Override
     public String find_in_set(String findStr, String setColumnName) {
 
-        return "find_in_set('"+findStr+"',"+setColumnName+")";
+        return "find_in_set('" + findStr + "'," + setColumnName + ")";
     }
 
     @Override
@@ -73,9 +77,9 @@ public class MysqlFunction extends AbstractSQLFunction {
 //    }
 
     private String getMysqlFormatString(String dateFormatterStr) {
-        if("yyyy-mm-dd".equals(dateFormatterStr) || "yyyy-MM-dd".equals(dateFormatterStr)){
+        if ("YYYY-MM-DD".equals(dateFormatterStr) || "yyyy-mm-dd".equals(dateFormatterStr) || "yyyy-MM-dd".equals(dateFormatterStr)) {
             dateFormatterStr = "%Y-%m-%d";
-        }else if("yyyy-MM-dd HH24:mi:ss".equals(dateFormatterStr)){
+        } else if ("yyyy-MM-dd HH24:mi:ss".equals(dateFormatterStr)) {
             dateFormatterStr = "%Y-%m-%d %H:%i:%s";
         } else if ("yyyymmddhh24miss".equals(dateFormatterStr)) {
             dateFormatterStr = "%Y%m%d%H%i%s";
@@ -100,16 +104,6 @@ public class MysqlFunction extends AbstractSQLFunction {
     }
 
     @Override
-    public String nvl_str(String column, String value) {
-        return " ifnull(" + column + ",'" + value + "')";
-    }
-
-    @Override
-    public String nvl_number(String column, int value) {
-        return " ifnull(" + column + "," + value + ")";
-    }
-
-    @Override
     public String get_connect() {
         return "||";
     }
@@ -118,11 +112,11 @@ public class MysqlFunction extends AbstractSQLFunction {
     public String date_add(String dateStr, String dateFormatterStr, String days) {
         dateFormatterStr = getMysqlFormatString(dateFormatterStr);
         String sep = "'";
-        if (dateStr.startsWith(SQLFunction.COLUMN_FIELD_FLAG)) {
+        if (dateStr.startsWith(COLUMN_FIELD_FLAG)) {
             dateStr = dateStr.substring(1);
             sep = "";
         }
-        return dateFormatterStr != null ? "date_add(to_date(" + sep + dateStr + sep + ",'" + dateFormatterStr + "') , interval " + days +" day) " : "date_add(to_date(" + sep + dateStr + sep + ",'yyyy-mm-dd')  , interval " + days +" day) " ;
+        return dateFormatterStr != null ? "date_add(STR_TO_DATE(" + sep + dateStr + sep + ",'" + dateFormatterStr + "') , interval " + days + " day) " : "date_add(STR_TO_DATE(" + sep + dateStr + sep + ",'%Y-%m-%d')  , interval " + days + " day) ";
 
     }
 
@@ -131,12 +125,23 @@ public class MysqlFunction extends AbstractSQLFunction {
         dateFormatterStr = getMysqlFormatString(dateFormatterStr);
 
         String sep = "'";
-        if (dateStr.startsWith(SQLFunction.COLUMN_FIELD_FLAG)) {
+        if (dateStr.startsWith(COLUMN_FIELD_FLAG)) {
             dateStr = dateStr.substring(1);
             sep = "";
         }
 
         return dateFormatterStr != null ? "STR_TO_DATE(" + sep + dateStr + sep + ",'" + dateFormatterStr + "')" : "STR_TO_DATE(" + sep + dateStr + sep + ",'%Y-%m-%d')";
+    }
+
+    @Override
+    public String field_to_date_func(String field, String dateFormatterStr) {
+        return dateFormatterStr != null ? "STR_TO_DATE(" + field + ",'" + dateFormatterStr + "')" : "STR_TO_DATE(" + field + ",'%Y-%m-%d')";
+    }
+
+    @Override
+    public String field_date_to_char_func(String dtdate, String dateFormatterStr) {
+        dateFormatterStr = getMysqlFormatString(dateFormatterStr);
+        return dateFormatterStr != null ? "DATE_FORMAT(" + dtdate + ",'" + dateFormatterStr + "')" : "DATE_FORMAT(" + dtdate + ",'%Y-%m-%d')";
     }
 
 //    @Override
@@ -283,7 +288,7 @@ public class MysqlFunction extends AbstractSQLFunction {
         return null;
     }
 
-//    @Override
+    //    @Override
 //    public String length_without_space(String str) {
 //        String restr = "";
 //        restr = "length(ltrim(rtrim(" + str + ")))";
@@ -349,10 +354,10 @@ public class MysqlFunction extends AbstractSQLFunction {
 //        return restr;
 //    }
 //
-//    public String to_char(String str) {
-//        String restr = "";
-//        restr = "char(" + str + ")";
-//        return this.trim(restr);
-//    }
+    public String to_char(String str) {
+        String restr = "";
+        restr = "CAST(" + str + " as CHAR)";
+        return restr;
+    }
 }
 

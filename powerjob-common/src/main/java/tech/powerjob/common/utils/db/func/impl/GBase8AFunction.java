@@ -2,11 +2,14 @@ package tech.powerjob.common.utils.db.func.impl;
 
 import tech.powerjob.common.utils.JobDateUtil;
 
-public class OracleFunction extends AbstractSQLFunction {
-
+/**
+ * @author shkstart
+ * @create 2023-07-17 18:44
+ */
+public class GBase8AFunction extends AbstractSQLFunction  {
     @Override
     public String now() {
-        return "sysdate";
+        return "sysdate()";
     }
 
     /////////    可以使用的方法      ///////////////////////////////////
@@ -33,12 +36,12 @@ public class OracleFunction extends AbstractSQLFunction {
 
     @Override
     public String db_date() {
-        return "trunc(sysdate)";
+        return "trunc(sysdate())";
     }
 
     @Override
     public String db_time_stamp() {
-        return "sysdate";
+        return "sysdate()";
     }
 
     @Override
@@ -59,6 +62,10 @@ public class OracleFunction extends AbstractSQLFunction {
         return str;
     }
 
+    public String to_char(String fieldName){
+        return "to_char(" + fieldName + ")";
+    }
+
     @Override
     public String find_in_set(String findStr, String setColumnName) {
 
@@ -70,19 +77,21 @@ public class OracleFunction extends AbstractSQLFunction {
         return "";
     }
 
-    @Override
+
+    //gbase8a沒有這個方法
+   /* @Override
     public String from_db_table() {
         return "from dual";
-    }
+    }*/
 
     @Override
     public String row_num() {
-        return " and rownum =1 ";
+        return " LIMIT 1 ";
     }
 
     @Override
     public String interval_second(String second) {
-        return "sysdate + numtodsinterval(" + second + ",'second')";
+        return "sysdate() + INTERVAL" + second + ",'second')";
         //https://www.cnblogs.com/xyz0601/archive/2015/04/11/4417165.html
     }
 
@@ -93,12 +102,12 @@ public class OracleFunction extends AbstractSQLFunction {
 
     @Override
     public String match_trade_ip() {
-        return "REGEXP_LIKE(T.TRADE_IP,'([[:digit:]]{1,3})\\.([[:digit:]]{1,3})\\.([[:digit:]]{1,3})\\.([[:digit:]]{1,3})')";
+        return "T.TRADE_IP RLIKE '([[:digit:]]{1,3})\\.([[:digit:]]{1,3})\\.([[:digit:]]{1,3})\\.([[:digit:]]{1,3})'";
     }
 
     @Override
     public String handle_insert_table(String tablename) {
-        String sql = " /*+append*/  into " + tablename + "  nologging ";
+        String sql = " /*+append*/  INTO " + tablename;
         return sql;
     }
 
@@ -142,7 +151,7 @@ public class OracleFunction extends AbstractSQLFunction {
 
     @Override
     public String uuid() {
-        return "sys_guid()";
+        return "uuid()";
     }
 
     @Override
@@ -152,15 +161,6 @@ public class OracleFunction extends AbstractSQLFunction {
         return date;
     }
 
-//    @Override
-//    public String date_format_for_mybatis(String dateStrAndDateFormatterStr)
-//    {
-//        String dateStr,  dateFormatterStr;
-//        dateStr=dateStrAndDateFormatterStr.split("\\|")[0];
-//        dateFormatterStr=dateStrAndDateFormatterStr.split("\\|")[1];
-//        return dateFormatterStr != null ? "to_date(" + dateStr + ",'" + dateFormatterStr + "')" : "to_date(" + dateStr + ",'yyyy-mm-dd')";
-//    }
-
     @Override
     public String get_partition_by(String groupFields, String orderFields) {
         String restr = "ROW_NUMBER() OVER(PARTITION BY " + groupFields + " ORDER BY " + orderFields + ")";
@@ -169,24 +169,12 @@ public class OracleFunction extends AbstractSQLFunction {
 
     @Override
     public String nvl_str(String column, String value) {
-        column = column.trim();
-        String flagcolumn = "";
-        if (column.startsWith(COLUMN_FIELD_FLAG)) {
-            flagcolumn = COLUMN_FIELD_FLAG;
-            column = column.substring(1);
-        }
-        return flagcolumn + "nvl(" + column + ",'" + value + "')";
+        return " ifnull(" + column + ",'" + value + "')";
     }
 
     @Override
     public String nvl_number(String column, String value) {
-        column = column.trim();
-        String flagcolumn = "";
-        if (column.startsWith(COLUMN_FIELD_FLAG)) {
-            flagcolumn = COLUMN_FIELD_FLAG;
-            column = column.substring(1);
-        }
-        return flagcolumn + "nvl(" + column + "," + value + ")";
+        return " ifnull(" + column + "," + value + ")";
     }
 
     @Override
@@ -195,36 +183,12 @@ public class OracleFunction extends AbstractSQLFunction {
     }
 
 
-//    @Override
-//    public String diff_date(String var1, String var2) {
-//        return null;
-//    }
-
     ////////    以下方法不再使用     /////////////////////////////////////
 
     public String diffDate(String str1, String str2) {
         return "(" + str1 + " - " + str2 + ")";
     }
 
-//    @Override
-//    public String ch2_num(String chstr) {
-//        return "to_number(" + chstr + ")";
-//    }
-//
-//    @Override
-//    public String first_row() {
-//        return null;
-//    }
-//
-//    @Override
-//    public String lock_row(String var1) {
-//        return null;
-//    }
-//
-//    @Override
-//    public String get_sequence_next_val(String var1) {
-//        return null;
-//    }
 
     public String firstrow() {
         return "and rownum=1";
@@ -239,96 +203,9 @@ public class OracleFunction extends AbstractSQLFunction {
         return sql;
     }
 
-//    @Override
-//    public String deal_inster_table(String var1) {
-//        return "";
-//    }
-
 
     @Override
     public String rownum() {
         return "ROWNUM";
     }
-
-//    @Override
-//    public String length_without_space(String str) {
-//        String restr = "";
-//        restr = "length(trim(" + str + "))";
-//        return restr;
-//    }
-
-//    @Override
-//    public String trim_last_chr(String str) {
-//        String restr = "";
-//        restr = "substr(" + str + ",1,length(" + str + ")-1)";
-//        return restr;
-//    }
-//
-//    @Override
-//    public String trim(String str) {
-//        String restr = "";
-//        restr = "trim(" + str + ")";
-//        return restr;
-//    }
-//
-//    @Override
-//    public String num2char(String str) {
-//        String restr = "";
-//        restr = "to_char(" + str + ")";
-//        return restr;
-//    }
-
-    public String to_char(String fieldName){
-        return "to_char(" + fieldName + ")";
-    }
-//    @Override
-//    public String short_date_to8_char(String str) {
-//        String restr = "";
-//        restr = "to_char(" + str + ",'yyyymmdd')";
-//        return restr;
-//    }
-//
-//    @Override
-//    public String to_number(String str) {
-//        String sql = "to_number(" + str + ")";
-//        return sql;
-//    }
-//
-//    @Override
-//    public String delete_repeat_record(String tablename, String primarykey) {
-//        StringBuffer sql = new StringBuffer();
-//        sql.append("Delete from ");
-//        sql.append(String.valueOf(tablename) + " a ");
-//        sql.append(" Where a.rowid > (Select min(rowid) from ");
-//        sql.append(String.valueOf(tablename) + " b where ");
-//        if (primarykey.indexOf(",") > 0) {
-//            String[] primarykeys = primarykey.split(",");
-//            int i = 0;
-//            while (i < primarykeys.length) {
-//                if (i == 0) {
-//                    sql.append(" a." + primarykeys[i] + "=b." + primarykeys[i]);
-//                } else {
-//                    sql.append(" and a." + primarykeys[i] + "=b." + primarykeys[i]);
-//                }
-//                ++i;
-//            }
-//        } else {
-//            sql.append("  a." + primarykey + "=b." + primarykey);
-//        }
-//        sql.append(" )");
-//        return sql.toString();
-//    }
-//
-//    @Override
-//    public String add_day(String date, String days) {
-//        return String.valueOf(this.date_format(date, null)) + days;
-//    }
-//
-//    @Override
-//    public String replace(String str, String org, String des) {
-//        String restr = "";
-//        restr = "replace(" + str + ",'" + org + "','" + des + "')";
-//        return restr;
-//    }
 }
-

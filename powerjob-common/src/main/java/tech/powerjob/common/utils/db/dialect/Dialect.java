@@ -3,6 +3,9 @@ package tech.powerjob.common.utils.db.dialect;
 import cn.hutool.core.util.StrUtil;
 import tech.powerjob.common.exception.ErrorCode;
 import tech.powerjob.common.utils.db.func.SQLFunction;
+import tech.powerjob.common.utils.db.func.impl.DmFunction;
+import tech.powerjob.common.utils.db.func.impl.GBase8AFunction;
+import tech.powerjob.common.utils.db.func.impl.Gauss200Function;
 import tech.powerjob.common.utils.db.func.impl.HiveFunction;
 import tech.powerjob.common.utils.db.func.impl.ImpalaFunction;
 import tech.powerjob.common.utils.db.func.impl.MysqlFunction;
@@ -10,15 +13,18 @@ import tech.powerjob.common.utils.db.func.impl.OracleFunction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static tech.powerjob.common.exception.ServiceExceptionUtil.exception;
 
+
 public enum Dialect {
+
     MYSQL("mysql", new MysqlFunction(), "MySql数据库"),
     ORACLE("oracle", new OracleFunction(), "Oracle数据库"),
     IMPALA("impala", new ImpalaFunction(), "Impala数据源"),
     HIVE("hive", new HiveFunction(), "Apache Hive数据源"),
-    //POSTGRE_SQL("postgresql", new PostgreSQLFunction(), "Postgre数据库"),
+    GBASE8A("gbase",new GBase8AFunction(),"GBase8A数据源"),
+    DM("dm", new DmFunction(), "Dm数据源"),
+    GAUSS200("gauss200", new Gauss200Function(), "gauss200数据库"),
     OTHER("other", null, "其他");
 
     public static final String NOT_SUPPORT = "NOT_SUPPORT";
@@ -109,12 +115,12 @@ public enum Dialect {
         if (sql == null) {
             throw exception(new ErrorCode(999, "Dialect pagin() SQL不能为空"));
         }
-        String trimedSql = sql.trim();
+        String trimedSql = sql.trim();        
 
         if (!StrUtil.startWithIgnoreCase(trimedSql, "select ")) {
             throw exception(new ErrorCode(999, "Dialect pagin() 请输入以select开头的 SQL 查询语句"));
         }
-        String body = trimedSql.substring(7).trim();
+        String body = trimedSql.substring(7).trim();        
 
         int skipRows = (pageNumber - 1) * pageSize;
         int skipRowsPlus1 = skipRows + 1;

@@ -37,6 +37,11 @@ public abstract class AbstractSQLFunction implements SQLFunction {
 
         return UNIMPLEMENTED_FUNCTION;
     }
+    @Override
+    public String field_date_to_char_func(String field,String dateFormatterStr){
+
+        return UNIMPLEMENTED_FUNCTION;
+    }
 
     /////////    可以使用的方法      ///////////////////////////////////
     @Override
@@ -44,16 +49,40 @@ public abstract class AbstractSQLFunction implements SQLFunction {
         String concatSql = "concat(";
         for (int i = 0; i < vars.length; i++) {
             String var = vars[i];
-            if (var.startsWith(COLUMN_FIELD_FLAG)&&var.length()>1) {
-                concatSql += "nvl("+var.substring(1)+",'')";
+            if (var.startsWith(COLUMN_FIELD_FLAG) && var.length() > 1) {
+                if (var.substring(1).startsWith("ifnull")) {
+                    concatSql += var.substring(1);
+                } else {
+                    concatSql += "ifnull(" + var.substring(1) + ",'')";
+                }
             } else {
                 concatSql += "'" + var + "'";
             }
-            if (i < vars.length-1) {
-                concatSql += ",";
-            }
+            if (i < vars.length - 1) concatSql += ",";
         }
         return concatSql + ")";
+    }
+
+    @Override
+    public String nvl_str(String column, String value) {
+        column = column.trim();
+        String flagcolumn = "";
+        if (column.startsWith(COLUMN_FIELD_FLAG)) {
+            flagcolumn = COLUMN_FIELD_FLAG;
+            column = column.substring(1);
+        }
+        return flagcolumn + "ifnull(" + column + ",'" + value + "')";
+    }
+
+    @Override
+    public String nvl_number(String column, String value) {
+        column = column.trim();
+        String flagcolumn = "";
+        if (column.startsWith(COLUMN_FIELD_FLAG)) {
+            flagcolumn = COLUMN_FIELD_FLAG;
+            column = column.substring(1);
+        }
+        return flagcolumn + "ifnull(" + column + "," + value + ")";
     }
 
     @Override
@@ -168,8 +197,6 @@ public abstract class AbstractSQLFunction implements SQLFunction {
     public String to_char(String fieldName){
         return fieldName;
     }
-
-    public abstract String date_add(String dateStr, String dateFormatterStr, String days);
 
 
     ////////    以下方法不再使用     /////////////////////////////////////
