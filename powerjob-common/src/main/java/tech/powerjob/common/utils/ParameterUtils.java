@@ -3,9 +3,6 @@ package tech.powerjob.common.utils;
 import cn.hutool.core.util.StrUtil;
 import tech.powerjob.common.enums.DataType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +11,6 @@ import java.util.Map;
  * parameter parse utils
  */
 public class ParameterUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(ParameterUtils.class);
 
     public static String convertParameterPlaceholders(String parameterString) {
         Map<String, String> parameterMap = new HashMap<>();

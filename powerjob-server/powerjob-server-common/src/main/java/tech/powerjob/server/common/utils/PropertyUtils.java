@@ -1,6 +1,5 @@
 package tech.powerjob.server.common.utils;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.InputStream;
@@ -14,7 +13,6 @@ import java.util.Properties;
  * @author tjq
  * @since 2020/5/18
  */
-@Slf4j
 public class PropertyUtils {
 
     private static final Properties PROPERTIES = new Properties();

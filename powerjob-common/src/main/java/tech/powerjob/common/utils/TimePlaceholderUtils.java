@@ -1,4 +1,4 @@
-package tech.powerjob.server.common.utils;
+package tech.powerjob.common.utils;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;

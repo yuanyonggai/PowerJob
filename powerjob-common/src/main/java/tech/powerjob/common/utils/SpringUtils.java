@@ -1,4 +1,4 @@
-package tech.powerjob.official.processors.util;
+package tech.powerjob.common.utils;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

@@ -1,7 +1,5 @@
 package tech.powerjob.common.utils;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -11,7 +9,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author tjq
  * @since 2020/6/3
  */
-@Slf4j
 public class SegmentLock {
 
     private final int mask;

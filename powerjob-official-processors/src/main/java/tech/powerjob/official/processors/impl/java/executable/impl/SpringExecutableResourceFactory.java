@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import jakarta.annotation.Resource;
+import tech.powerjob.common.utils.SpringUtils;
 import tech.powerjob.official.processors.impl.java.executable.ExecutableResourceFactory;
-import tech.powerjob.official.processors.util.SpringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

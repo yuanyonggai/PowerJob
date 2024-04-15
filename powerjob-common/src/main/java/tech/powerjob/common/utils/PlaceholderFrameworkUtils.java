@@ -2,13 +2,16 @@ package tech.powerjob.common.utils;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
-
+import cn.hutool.core.util.StrUtil;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import groovy.text.TemplateEngine;
-import lombok.extern.slf4j.Slf4j;
 import tech.powerjob.common.utils.db.dialect.Dialect;
+import tech.powerjob.common.utils.function.DictWorkDayFunction;
+import tech.powerjob.common.utils.function.RICDFunction;
 import tech.powerjob.common.utils.function.StringFunction;
+import tech.powerjob.common.utils.function.TimeFunction;
+import tech.powerjob.common.utils.function.WorkDayFunction;
 
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -17,7 +20,6 @@ import java.util.Map;
 /**
  * 占位符替换工具类
  */
-@Slf4j
 public class PlaceholderFrameworkUtils {
 
     private static TemplateEngine engine = null;
@@ -37,6 +39,11 @@ public class PlaceholderFrameworkUtils {
             }
             //将自定义函数注册到 Binding 中
             finalBinding.put("StringFunction", new StringFunction());
+            finalBinding.put("str", new StrUtil());
+            finalBinding.put("time", new TimeFunction(finalBinding));
+            finalBinding.put("ricd", new RICDFunction(finalBinding));
+            finalBinding.put("workday", new WorkDayFunction(finalBinding));
+            finalBinding.put("dictworkday", new DictWorkDayFunction(finalBinding));
 
             if (binding.get(Dialect.class.getCanonicalName()) != null) {
                 Dialect dialect = (Dialect) binding.get(Dialect.class.getCanonicalName());
