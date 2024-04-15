@@ -39,11 +39,11 @@ public class PlaceholderFrameworkUtils {
             }
             //将自定义函数注册到 Binding 中
             finalBinding.put("StringFunction", new StringFunction());
-            finalBinding.put("str", new StrUtil());
-            finalBinding.put("time", new TimeFunction(finalBinding));
-            finalBinding.put("ricd", new RICDFunction(finalBinding));
-            finalBinding.put("workday", new WorkDayFunction(finalBinding));
-            finalBinding.put("dictworkday", new DictWorkDayFunction(finalBinding));
+            finalBinding.put("STR", new StrUtil());
+            finalBinding.put("TIME", new TimeFunction(finalBinding));
+            finalBinding.put("RICD", new RICDFunction(finalBinding));
+            finalBinding.put("WORKDAY", new WorkDayFunction(finalBinding));
+            finalBinding.put("DICTWORKDAY", new DictWorkDayFunction(finalBinding));
 
             if (binding.get(Dialect.class.getCanonicalName()) != null) {
                 Dialect dialect = (Dialect) binding.get(Dialect.class.getCanonicalName());

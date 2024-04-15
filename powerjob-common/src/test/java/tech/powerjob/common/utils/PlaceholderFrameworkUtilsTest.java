@@ -58,15 +58,15 @@ class PlaceholderFrameworkUtilsTest {
         Map<String, Object> binding = new HashMap<>();
         binding.put("DataDate", "2024-04-15");     
         //${TIME('yyyy-MM-dd-1')}
-        String templateContent = "${time.convert('yyyy-MM-dd')}";
+        String templateContent = "${TIME.convert('yyyy-MM-dd')}";
         String result = PlaceholderFrameworkUtils.convert(templateContent, binding);
         System.out.println(result);
 
-        templateContent = "${time.convert('week_end(yyyy-MM-dd,1)')}";
+        templateContent = "${TIME.convert('week_end(yyyy-MM-dd,1)')}";
         result = PlaceholderFrameworkUtils.convert(templateContent, binding);
         System.out.println(result);
 
-        templateContent = "${time.convert('timestamp(yyyyMMddHHmmss)')}";
+        templateContent = "${TIME.convert('timestamp(yyyyMMddHHmmss)')}";
         result = PlaceholderFrameworkUtils.convert(templateContent, binding);
         System.out.println(result);
     }
@@ -79,7 +79,7 @@ class PlaceholderFrameworkUtilsTest {
         reportBranchCodeList.add("345");
         binding.put("reportBranchCodeList", reportBranchCodeList);     
         //${RICD('A.RICD',reportBranchCodeList)}
-        String templateContent = "${ricd.convert('A.RICD')}";
+        String templateContent = "${RICD.convert('A.RICD')}";
         String result = PlaceholderFrameworkUtils.convert(templateContent, binding);
         System.out.println(result);        
     }
@@ -89,7 +89,7 @@ class PlaceholderFrameworkUtilsTest {
         Map<String, Object> binding = new HashMap<>();
         binding.put("DataDate", "2024-04-15");     
         //${WORK_DAY(10)}
-        String templateContent = "${workday.convert(10)}";
+        String templateContent = "${WORKDAY.convert(10)}";
         String result = PlaceholderFrameworkUtils.convert(templateContent, binding);
         System.out.println(result);        
     }
@@ -99,7 +99,7 @@ class PlaceholderFrameworkUtilsTest {
         Map<String, Object> binding = new HashMap<>();
         binding.put("DataDate", "2024-04-15");     
         //${WORK_DAY(10)}
-        String templateContent = "${workday.convert(10)}";
+        String templateContent = "${WORKDAY.convert(10)}";
         String result = PlaceholderFrameworkUtils.convert(templateContent, binding);
         System.out.println(result);        
     }

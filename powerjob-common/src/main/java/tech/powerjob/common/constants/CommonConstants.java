@@ -1,6 +1,6 @@
 package tech.powerjob.common.constants;
 
-public class Constants {
+public class CommonConstants {
     /**
      * 系统中代表数据日期的字段
      */

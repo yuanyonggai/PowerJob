@@ -4,10 +4,18 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StopWatch;
+
+import tech.powerjob.common.constants.CommonConstants;
+import tech.powerjob.common.utils.SqlFormatterUtils;
+import tech.powerjob.common.utils.StriUtils;
+import tech.powerjob.common.utils.db.func.SQLFunctionTranslator;
 import tech.powerjob.official.processors.CommonBasicProcessor;
 import tech.powerjob.official.processors.util.CommonUtils;
 import tech.powerjob.worker.core.processor.ProcessResult;
@@ -18,6 +26,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -105,18 +114,30 @@ public abstract class AbstractSqlProcessor extends CommonBasicProcessor {
 
         OmsLogger omsLogger = ctx.getOmsLogger();
 
+        HashMap<String, Object> contextData = new HashMap<>();
+        contextData.put(CommonConstants.DATA_DATE, ctx.getDataDate());        
+
         boolean originAutoCommitFlag ;
         try (Connection connection = getConnection(sqlParams, ctx)) {
             originAutoCommitFlag = connection.getAutoCommit();
             connection.setAutoCommit(false);
             try (Statement statement = connection.createStatement()) {
                 statement.setQueryTimeout(sqlParams.getTimeout() == null ? DEFAULT_TIMEOUT : sqlParams.getTimeout());
-                statement.execute(sqlParams.getSql());
 
-                connection.commit();
-
-                if (sqlParams.showResult) {
-                    outputSqlResult(statement, omsLogger);
+                //1.分割sql, 默认分号;
+                String sqlSeparator = StrUtil.isBlank(sqlParams.getDelimiter()) ? ";" : sqlParams.getDelimiter();
+                //2.sql分隔
+                List<String> sqlList = CollectionUtil.newArrayList();
+                SqlFormatterUtils.splitSqlScript(sqlParams.getSql(), sqlSeparator, sqlList);
+                //遍历sql
+                int stmtNumber = 0;
+                for (String sql : sqlList) {
+                    stmtNumber++;
+                    //3.sql自定义函数解析
+                    sql = SQLFunctionTranslator.trans(connection, sql, contextData);
+                    omsLogger.info("第" + stmtNumber + "条 execute sql: " + sql);
+                    //4.执行sql
+                    sqlExecute(sqlParams, omsLogger, connection, statement, sql);
                 }
             } catch (Throwable e) {
                 omsLogger.error("execute sql failed, try to rollback", e);
@@ -125,6 +146,17 @@ public abstract class AbstractSqlProcessor extends CommonBasicProcessor {
             } finally {
                 connection.setAutoCommit(originAutoCommitFlag);
             }
+        }
+    }
+
+    private void sqlExecute(SqlParams sqlParams, OmsLogger omsLogger, Connection connection, Statement statement, String sql)
+            throws SQLException {
+        statement.execute(sql);
+
+        connection.commit();
+
+        if (sqlParams.showResult) {
+            outputSqlResult(statement, omsLogger);
         }
     }
 
@@ -248,6 +280,11 @@ public abstract class AbstractSqlProcessor extends CommonBasicProcessor {
          * 是否展示 SQL 执行结果
          */
         private boolean showResult;
+
+        /**
+         * sql分隔符 默认;
+         */
+        private String delimiter = ";";
     }
 
 

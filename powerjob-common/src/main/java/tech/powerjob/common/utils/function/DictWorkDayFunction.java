@@ -14,7 +14,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import tech.powerjob.common.constants.Constants;
+import tech.powerjob.common.constants.CommonConstants;
 import tech.powerjob.common.exception.PowerJobException;
 import tech.powerjob.common.utils.SpringUtils;
 
@@ -46,11 +46,11 @@ public class DictWorkDayFunction {
         log.info(dictSql);
         dateStep = jdbcTemplatePlat.queryForObject(dictSql, Integer.class);
 
-        if (finalBinding.get(Constants.DATA_DATE) != null) {
+        if (finalBinding.get(CommonConstants.DATA_DATE) != null) {
             try {
-                dateString = String.valueOf(finalBinding.get(Constants.DATA_DATE));
+                dateString = String.valueOf(finalBinding.get(CommonConstants.DATA_DATE));
             } catch (Exception e) {
-                log.info(String.valueOf(finalBinding.get(Constants.DATA_DATE)), e);
+                log.info(String.valueOf(finalBinding.get(CommonConstants.DATA_DATE)), e);
             }
         } else {
             dateString = DateUtil.today();

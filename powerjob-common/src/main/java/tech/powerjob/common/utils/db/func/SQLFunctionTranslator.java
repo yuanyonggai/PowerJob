@@ -72,7 +72,7 @@ public class SQLFunctionTranslator {
             if (templateSQl == null) {
                 return "";
             }
-            //替换sql语句中的--注释
+            //替换sql语句中的注释
             templateSQl = StriUtils.filterSqlComment(templateSQl);
             templateSQl = templateSQl.trim();//去掉前后空格
             if (templateSQl.startsWith("select") || templateSQl.startsWith("SELECT")) {

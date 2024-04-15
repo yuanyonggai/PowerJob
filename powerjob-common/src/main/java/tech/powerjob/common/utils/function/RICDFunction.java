@@ -9,7 +9,7 @@ import cn.hutool.core.collection.IterUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import tech.powerjob.common.constants.Constants;
+import tech.powerjob.common.constants.CommonConstants;
 import tech.powerjob.common.exception.PowerJobException;
 
 @Data
@@ -22,8 +22,8 @@ public class RICDFunction {
             throw new PowerJobException("参数错误,表字段名为空");
         }
         List<String> reportBranchCodeList = null;
-        if (finalBinding.get(Constants.REPORT_BRANCH_CODE_LIST) != null) {
-            reportBranchCodeList = (List<String>) finalBinding.get(Constants.REPORT_BRANCH_CODE_LIST);
+        if (finalBinding.get(CommonConstants.REPORT_BRANCH_CODE_LIST) != null) {
+            reportBranchCodeList = (List<String>) finalBinding.get(CommonConstants.REPORT_BRANCH_CODE_LIST);
         } else {
             throw new PowerJobException("参数错误,报送机构编码列表为空");
         }

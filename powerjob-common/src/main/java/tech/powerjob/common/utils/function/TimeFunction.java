@@ -8,7 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import tech.powerjob.common.constants.Constants;
+import tech.powerjob.common.constants.CommonConstants;
 import tech.powerjob.common.exception.PowerJobException;
 import tech.powerjob.common.utils.TimePlaceholderUtils;
 
@@ -23,11 +23,11 @@ public class TimeFunction {
         if (StrUtil.isBlankIfStr(input)) {
             throw new PowerJobException("参数未输入错误");
         }
-        if (finalBinding.get(Constants.DATA_DATE) != null) {
+        if (finalBinding.get(CommonConstants.DATA_DATE) != null) {
             try {
-                date = DateUtil.parse(String.valueOf(finalBinding.get(Constants.DATA_DATE)));
+                date = DateUtil.parse(String.valueOf(finalBinding.get(CommonConstants.DATA_DATE)));
             } catch (Exception e) {
-                log.info(String.valueOf(finalBinding.get(Constants.DATA_DATE)), e);
+                log.info(String.valueOf(finalBinding.get(CommonConstants.DATA_DATE)), e);
             }
         } else {
             throw new PowerJobException("参数DataDate为空错误");
