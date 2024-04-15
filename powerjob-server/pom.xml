@@ -47,7 +47,7 @@
         <!-- skip this module when deploying. -->
         <maven.deploy.skip>true</maven.deploy.skip>
 
-        <groovy.version>3.0.10</groovy.version>
+        <!-- <groovy.version>3.0.10</groovy.version> -->
         <cron-utils.version>9.2.1</cron-utils.version>
 
         <powerjob-common.version>4.3.9</powerjob-common.version>
@@ -57,7 +57,6 @@
         <aliyun-sdk-oss.version>3.17.1</aliyun-sdk-oss.version>
         <aws-java-sdk-s3.version>1.12.665</aws-java-sdk-s3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <hutool.version>5.7.12</hutool.version>
     </properties>
 
     <dependencyManagement>
@@ -131,7 +130,6 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
-                <version>${hutool.version}</version>
             </dependency>
 
         </dependencies>
