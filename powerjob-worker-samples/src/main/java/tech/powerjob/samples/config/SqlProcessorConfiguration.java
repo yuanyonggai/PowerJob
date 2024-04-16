@@ -56,7 +56,7 @@ public class SqlProcessorConfiguration {
         return DruidDataSourceBuilder.create().build();
     }
 
-    @Bean("springDatasourceSqlProcessor")
+    @Bean("SpringDatasourceSqlProcessor")
     //修改：删除默认数据源
     public SpringDatasourceSqlProcessor simpleSpringSqlProcessor(DataSource amldmpDataSource, DataSource amldmDataSource) {
         SpringDatasourceSqlProcessor springDatasourceSqlProcessor = new SpringDatasourceSqlProcessor();

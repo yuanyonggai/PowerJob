@@ -19,7 +19,7 @@ import java.util.Properties;
  * @author tjq
  * @since 2021/3/14
  */
-@Component("dynamicDatasourceSqlProcessor")
+@Component("DynamicDatasourceSqlProcessor")
 public class DynamicDatasourceSqlProcessor extends AbstractSqlProcessor {
 
     @Override

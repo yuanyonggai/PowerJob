@@ -9,6 +9,8 @@ import tech.powerjob.worker.log.OmsLogger;
 import lombok.Data;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
 import tech.powerjob.official.processors.CommonBasicProcessor;
 import tech.powerjob.official.processors.util.CommonUtils;
 
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
  * @author Jiang Jining
  * @since 2021/1/30
  */
+@Component("HttpProcessor")
 public class HttpProcessor extends CommonBasicProcessor {
 
     /**

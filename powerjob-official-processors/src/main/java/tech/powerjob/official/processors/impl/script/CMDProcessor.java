@@ -2,12 +2,15 @@ package tech.powerjob.official.processors.impl.script;
 
 import java.nio.charset.Charset;
 
+import org.springframework.stereotype.Component;
+
 /**
  * CMDProcessor
  *
  * @author fddc
  * @since 2021/5/14
  */
+@Component("CMDProcessor")
 public class CMDProcessor extends AbstractScriptProcessor {
 
     @Override

@@ -1,11 +1,14 @@
 package tech.powerjob.official.processors.impl.script;
 
+import org.springframework.stereotype.Component;
+
 /**
  * shell processor
  *
  * @author tjq
  * @since 2021/2/7
  */
+@Component("ShellProcessor")
 public class ShellProcessor extends AbstractScriptProcessor {
 
     @Override

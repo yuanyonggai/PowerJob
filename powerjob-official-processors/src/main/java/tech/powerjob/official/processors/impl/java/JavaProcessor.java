@@ -20,7 +20,7 @@ import tech.powerjob.worker.log.OmsLogger;
  * @author yyg
  * @since 2024/4/11
  */
-@Component("javaProcessor")
+@Component("JavaProcessor")
 @Slf4j
 public class JavaProcessor extends CommonBasicProcessor {
 

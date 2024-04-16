@@ -11,6 +11,7 @@ import com.google.common.base.Stopwatch;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Collection;
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
  * @author tjq
  * @since 2021/2/1
  */
+@Component("FileCleanupProcessor")
 public class FileCleanupProcessor implements BroadcastProcessor {
 
     @Override

@@ -2,12 +2,15 @@ package tech.powerjob.official.processors.impl.script;
 
 import java.nio.charset.Charset;
 
+import org.springframework.stereotype.Component;
+
 /**
  * PowerShellProcessor
  *
  * @author fddc
  * @since 2021/5/14
  */
+@Component("PowerShellProcessor")
 public class PowerShellProcessor extends AbstractScriptProcessor {
 
     @Override

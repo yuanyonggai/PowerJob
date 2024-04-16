@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
 import tech.powerjob.common.serialize.JsonUtils;
 import tech.powerjob.official.processors.util.CommonUtils;
 import tech.powerjob.worker.core.processor.ProcessResult;
@@ -29,6 +31,7 @@ import java.util.Optional;
  * @since 2022/9/17
  */
 @Slf4j
+@Component("ConfigProcessor")
 public class ConfigProcessor implements BroadcastProcessor {
 
     /**

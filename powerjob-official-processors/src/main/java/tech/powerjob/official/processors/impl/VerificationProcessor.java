@@ -5,6 +5,8 @@ import com.google.common.collect.Lists;
 import lombok.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
 import tech.powerjob.common.exception.PowerJobException;
 import tech.powerjob.common.utils.NetUtils;
 import tech.powerjob.official.processors.CommonBasicProcessor;
@@ -28,6 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author tjq
  * @since 2023/8/13
  */
+@Component("VerificationProcessor")
 public class VerificationProcessor extends CommonBasicProcessor implements MapReduceProcessor, BroadcastProcessor {
 
     @Override
