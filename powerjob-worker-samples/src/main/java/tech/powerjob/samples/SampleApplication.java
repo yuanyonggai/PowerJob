@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @SpringBootApplication(scanBasePackages = { "tech.powerjob.official.processors.impl",
         "tech.powerjob.official.processors.impl.java", "tech.powerjob.samples.config",
-        "tech.powerjob.official.processors.impl.script", "tech.powerjob.official.processors.impl.sql" })
+        "tech.powerjob.official.processors.impl.script", "tech.powerjob.official.processors.impl.sql", "tech.powerjob.official.processors.aml.rr" })
 public class SampleApplication {
     public static void main(String[] args) {
         SpringApplication.run(SampleApplication.class, args);

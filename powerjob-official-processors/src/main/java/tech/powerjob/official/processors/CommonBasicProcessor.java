@@ -7,6 +7,9 @@ import tech.powerjob.worker.core.processor.sdk.BasicProcessor;
 import tech.powerjob.worker.log.OmsLogger;
 import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import tech.powerjob.official.processors.util.CommonUtils;
 
@@ -21,6 +24,13 @@ public abstract class CommonBasicProcessor implements BasicProcessor {
 
     @Override
     public ProcessResult process(TaskContext ctx) throws Exception {
+
+        Map<String, String> workflowContext = ctx.getWorkflowContext().fetchWorkflowContext();
+        log.info("工作流上下文数据:{}", workflowContext);
+        log.info("用户上下文数据:{}", ctx.getUserContext());
+        log.info("任务实例运行数据:{}", ctx.getInstanceParams());
+        log.info("控制台传递的参数:{}", ctx.getJobParams());
+        log.info("数据日期:{}", ctx.getDataDate());
 
         OmsLogger omsLogger = ctx.getOmsLogger();
         String securityDKey = getSecurityDKey();
