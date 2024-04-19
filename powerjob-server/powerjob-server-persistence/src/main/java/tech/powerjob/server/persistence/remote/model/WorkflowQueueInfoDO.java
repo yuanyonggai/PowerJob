@@ -43,7 +43,7 @@ public class WorkflowQueueInfoDO {
     private String gdh;
 
     /**
-     * 工单号状态(0：就绪 1：成功 2：正在执行 3：跑批失败)
+     * 工单号状态(WAITING(1, "等待调度"), RUNNING(2, "运行中"), FAILED(3, "失败"), SUCCEED(4, "成功"), STOPPED(10, "手动停止");)
      */
     @Column(nullable = false)
     private Integer gdhStatus;
@@ -58,8 +58,13 @@ public class WorkflowQueueInfoDO {
      * 工作流id
      */
     @Column(nullable = false)
-    private Long workflowId;    
+    private Long workflowId;   
 
+    /**
+     * 工作流实例id
+     */
+    private Long wfInstanceId;
+    
     /**
      * 开始时间
      */
